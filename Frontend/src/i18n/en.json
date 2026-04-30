@@ -1,0 +1,17 @@
+{
+  "navbar": {
+    "orders": "Orders",
+    "search": "Search for fresh vegetables...",
+    "nearMe": "Near Me",
+    "all": "All",
+    "account": "Account",
+    "sell": "Sell on KisanMitra",
+    "dashboard": "Dashboard",
+    "logout": "Logout",
+    "mainMenu": "Main Menu",
+    "signOut": "Sign Out",
+    "yourAccount": "Your Account",
+    "hello": "Hello",
+    "KisanMitra":"KisanMitra"
+  }
+}
