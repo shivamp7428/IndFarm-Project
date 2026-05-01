@@ -255,29 +255,37 @@ export function Navbar({ cartCount = 0, isLoggedIn = false, userName = "Rajesh" 
     <>
       <nav className="sticky top-0 z-50 w-full shadow-sm">
         {/* Top Header */}
-        <div className="bg-white px-4 md:px-8 py-3 flex items-center justify-between gap-4 border-b border-[#F0FDF4]">
-          <button className="md:hidden p-2 hover:bg-[#F0FDF4] rounded-xl transition-colors" onClick={() => setMobileMenuOpen(true)}>
-            <Menu size={24} className="text-[#166534]" />
-          </button>
+       <div className="bg-white px-4 md:px-8 py-3 flex items-center justify-between gap-4 border-b border-[#F0FDF4]">
+  
+  <button className="md:hidden p-2 hover:bg-[#F0FDF4] rounded-xl transition-colors" onClick={() => setMobileMenuOpen(true)}>
+    <Menu size={24} className="text-[#166534]" />
+  </button>
 
-          <div className="flex items-center gap-2 shrink-0 cursor-pointer">
-            <div className="bg-[#16A34A] p-2 rounded-2xl text-white shadow-lg hidden sm:block shadow-[#BBF7D0]">
-              <Leaf size={24} />
-            </div>
-            <a href="/"><span className="text-2xl font-black text-[#166534] tracking-tight ">{t.KisanMitra}</span></a>
-          </div>
+  {/* Logo */}
+  <div className="flex items-center gap-2 shrink-0 cursor-pointer">
+    <div className="bg-[#16A34A] p-2 rounded-2xl text-white shadow-lg hidden sm:block shadow-[#BBF7D0]">
+      <Leaf size={24} />
+    </div>
+    <a href="/">
+      <span className="text-2xl font-black text-[#166534] tracking-tight">
+        {t.KisanMitra}
+      </span>
+    </a>
+  </div>
 
-          <SearchBar />
+  {/* ✅ ADD THIS LINE */}
+  <SearchBar />
 
-          <div className="flex items-center gap-1 sm:gap-4">
-            {/* Quick Language Toggle Desktop */}
-            <button
-              onClick={toggleLanguage}
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 border border-[#BBF7D0] rounded-lg text-xs font-bold text-[#15803D] hover:bg-[#F0FDF4] transition-all"
-            >
-              <Globe size={16} />
-              {lang === "en" ? "हिन्दी" : "ENG"}
-            </button>
+  {/* Right Side */}
+  <div className="flex items-center gap-2 sm:gap-4">
+
+       <button
+        onClick={toggleLanguage}
+        className="hidden md:flex items-center gap-1 px-2 py-1 border border-[#BBF7D0] rounded-lg text-xs font-bold text-[#15803D] hover:bg-[#F0FDF4] transition-all"
+        >
+       <Globe size={16} />
+       {lang === "en" ? "हिन्दी" : "ENG"}
+</button>
 
             <AccountDropdown isLoggedIn={isLoggedIn} userName={userName} />
 
