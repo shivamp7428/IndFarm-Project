@@ -265,7 +265,7 @@ export const AIChatbot = () => {
                     <button
                       key={i}
                       onClick={() => handleSend(action.label)}
-                      className="bg-white border border-primary/10 px-3 py-1.5 rounded-pill text-[10px] font-bold text-primary flex items-center gap-1.5 hover:bg-primary hover:text-white transition-all shadow-sm"
+                      className="bg-[#16A34A] border border-primary/10 px-3 py-1.5 rounded-pill text-[10px] font-bold text-primary flex items-center gap-1.5 hover:bg-primary hover:text-white transition-all shadow-sm"
                     >
                       {action.icon} {action.label}
                     </button>
@@ -288,7 +288,7 @@ export const AIChatbot = () => {
                       disabled={!input.trim() || isLoading}
                       className={cn(
                         "p-3 rounded-xl transition-all shadow-lg active:scale-95",
-                        !input.trim() || isLoading ? "bg-gray-100 text-gray-400" : "bg-primary text-white hover:bg-primary-light"
+                        !input.trim() || isLoading ? "bg-[#16A34A] text-gray-100" : "bg-primary text-white hover:bg-primary-light"
                       )}
                     >
                       <Send size={18} />
