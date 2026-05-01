@@ -38,7 +38,7 @@ export const ProductCard = ({ product, onClick, onAddToCart }) => {
         <div className="flex items-center justify-between pt-1">
           <div className="flex flex-col">
             <span className="text-primary font-bold text-xl">
-              ${product.price.toFixed(2)}
+              ₹{product.price.toFixed(2)}
               <span className="text-xs text-gray-400 font-normal"> / {product.unit}</span>
             </span>
             <div className="flex items-center gap-1">

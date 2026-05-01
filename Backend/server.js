@@ -4,6 +4,9 @@ import dotenv from "dotenv"
 import morgan from "morgan"
 import connectDB from './config/db.js';
 import authRouter from './router/authRouter.js'
+import dns from 'dns'
+
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 dotenv.config()
 connectDB();

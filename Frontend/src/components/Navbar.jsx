@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import {Leaf,ShoppingCart,Package,Search,MapPin,Menu,X,User,ChevronRight,ChevronDown,Home,ShoppingBag,Settings,LogOut,Info,LayoutDashboard,} from "lucide-react";
 import { useTranslation } from "../context/LanguageContext";
+
 const categories = ["Vegetables","Fruits","Grains","Dairy","Organic","Offers","Farmer Stories",];
 
 function LanguageSelector() {
@@ -214,7 +215,7 @@ function MobileMenu({ isOpen, setIsOpen, userName }) {
   );
 }
 
-export function Navbar({ cartCount = 3, isLoggedIn = true, userName = "Rajesh" }) {
+export function Navbar({ cartCount = 3, isLoggedIn = true, userName = "Rajesh", setView }) {
   const { lang, toggleLanguage, translations: t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -226,14 +227,17 @@ export function Navbar({ cartCount = 3, isLoggedIn = true, userName = "Rajesh" }
             <Menu size={24} className="text-[#166534]" />
           </button>
 
-          <div className="flex items-center gap-2 shrink-0 cursor-pointer">
-            <div className="bg-[#16A34A] p-2 rounded-2xl text-[#FFFFFF] shadow-lg shadow-[#BBF7D0]">
-              <Leaf size={24} />
-            </div>
-            <span className="text-2xl font-black text-[#166534] tracking-tight hidden sm:block">
-              KisanMitra
-            </span>
-          </div>
+        <div 
+         className="flex items-center gap-2 shrink-0 cursor-pointer"
+         onClick={() => setView('home')} 
+         >
+         <div className="bg-[#16A34A] p-2 rounded-2xl text-[#FFFFFF] shadow-lg shadow-[#BBF7D0]">
+           <Leaf size={24} />
+         </div>
+         <span className="text-2xl font-black text-[#166534] tracking-tight hidden sm:block">
+           KisanMitra
+         </span>
+         </div>
 
           <SearchBar />
 
