@@ -18,7 +18,6 @@ export const AIChatbot = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [apiKeyMissing, setApiKeyMissing] = useState(false);
   const [size, setSize] = useState({ width: 400, height: 550 });
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [btnPosition, setBtnPosition] = useState({ x: 0, y: 0 });
@@ -48,6 +47,7 @@ export const AIChatbot = () => {
     }
   }, [messages, isMinimized]);
 
+  // ORIGINAL API LOGIC (Unchanged)
   const handleSend = async (text = input) => {
     const messageText = text || input;
     if (!messageText.trim() || isLoading) return;
@@ -111,7 +111,6 @@ export const AIChatbot = () => {
 
   return (
     <>
-      {/* Floating Toggle Button - Now Draggable */}
       <AnimatePresence>
         {!isOpen && (
           <motion.button
@@ -133,11 +132,11 @@ export const AIChatbot = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-20 right-6 md:bottom-8 md:right-8 z-50 p-4 bg-primary text-white rounded-full shadow-[0_10px_40px_rgba(46,125,50,0.3)] border-2 border-white transition-shadow overflow-hidden group cursor-grab active:cursor-grabbing"
+            className="fixed bottom-20 right-6 md:bottom-8 md:right-8 z-50 p-4 bg-emerald-600 text-white rounded-full shadow-[0_10px_40px_rgba(5,150,105,0.3)] border-2 border-white transition-shadow overflow-hidden group cursor-grab active:cursor-grabbing"
           >
             <div className="relative z-10 pointer-events-none">
               <MessageCircle size={28} className="group-hover:rotate-12 transition-transform" />
-              <div className="absolute -top-1 -right-1 bg-accent w-3 h-3 rounded-full border-2 border-white animate-pulse"></div>
+              <div className="absolute -top-1 -right-1 bg-yellow-400 w-3 h-3 rounded-full border-2 border-emerald-600 animate-pulse"></div>
             </div>
           </motion.button>
         )}
@@ -168,35 +167,27 @@ export const AIChatbot = () => {
             }}
             exit={{ opacity: 0, y: 50, scale: 0.95 }}
             className={cn(
-              "fixed z-50 bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-primary/10",
+              "fixed z-50 bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-emerald-100",
               isMinimized ? "rounded-2xl" : "rounded-[2.5rem]",
-              "bottom-20 right-4 md:bottom-8 md:right-8",
-              "w-[calc(100vw-32px)] sm:w-[400px]"
+              "bottom-20 right-4 md:bottom-8 md:right-8"
             )}
           >
-            {/* Header - Handles Dragging */}
+            {/* Header - Styled with Forest Green Gradient */}
             <div 
               onPointerDown={(e) => dragControls.start(e)}
-              className="bg-primary p-5 text-white flex items-center justify-between cursor-grab active:cursor-grabbing shrink-0 relative"
+              className="bg-gradient-to-r from-emerald-700 to-emerald-600 p-5 text-white flex items-center justify-between cursor-grab active:cursor-grabbing shrink-0 relative"
             >
               <div className="flex items-center gap-3">
-                <div className="bg-white/20 p-2 rounded-xl">
+                <div className="bg-white/20 p-2 rounded-xl backdrop-blur-md">
                   <Bot size={22} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="font-heading font-bold text-base leading-none">Agro AI Assistant</h3>
+                  <h3 className="font-bold text-base leading-none tracking-tight">KisanMitra AI</h3>
                   <div className="flex items-center gap-1.5 mt-1">
-                    <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse shadow-[0_0_8px_#FFB300]" />
-                    <span className="text-[9px] uppercase tracking-[0.2em] font-black opacity-80">Connected</span>
+                    <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-pulse shadow-[0_0_8px_#FACC15]" />
+                    <span className="text-[9px] uppercase tracking-widest font-bold text-emerald-100">Live Assistant</span>
                   </div>
                 </div>
-              </div>
-
-              {/* Drag Indicator Dots */}
-              <div className="absolute top-1 left-1/2 -translate-x-1/2 flex gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
-                <div className="w-1 h-1 bg-white rounded-full"></div>
-                <div className="w-1 h-1 bg-white rounded-full"></div>
-                <div className="w-1 h-1 bg-white rounded-full"></div>
               </div>
               
               <div className="flex items-center gap-1" onPointerDown={e => e.stopPropagation()}>
@@ -206,7 +197,7 @@ export const AIChatbot = () => {
                 <button onClick={() => setIsMinimized(!isMinimized)} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors" title="Minimize">
                   <Minus size={16} />
                 </button>
-                <button onClick={() => setIsOpen(false)} className="p-1.5 hover:bg-red-500 rounded-lg transition-colors" title="Close">
+                <button onClick={() => setIsOpen(false)} className="p-1.5 hover:bg-red-500/80 rounded-lg transition-colors" title="Close">
                   <X size={16} />
                 </button>
               </div>
@@ -217,7 +208,7 @@ export const AIChatbot = () => {
               <>
                 <div 
                   ref={scrollRef}
-                  className="flex-1 overflow-y-auto p-6 space-y-5 bg-gradient-to-b from-bg-warm/50 to-white"
+                  className="flex-1 overflow-y-auto p-6 space-y-5 bg-gradient-to-b from-emerald-50/50 to-white"
                 >
                   {messages.map((msg) => (
                     <div 
@@ -233,39 +224,39 @@ export const AIChatbot = () => {
                       )}>
                         <div className={cn(
                           "p-1 rounded-md",
-                          msg.role === 'user' ? "bg-accent/10 text-accent" : "bg-primary/10 text-primary"
+                          msg.role === 'user' ? "bg-emerald-100 text-emerald-700" : "bg-emerald-700 text-white"
                         )}>
                           {msg.role === 'user' ? <User size={10} /> : <Bot size={10} />}
                         </div>
-                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-800/40">
                           {msg.role === 'user' ? 'You' : 'KisanMitra'}
                         </span>
                       </div>
                       <div className={cn(
                         "px-4 py-3 rounded-2xl text-[13px] leading-relaxed shadow-sm",
                         msg.role === 'user' 
-                          ? "bg-primary text-white rounded-tr-none font-medium" 
-                          : "bg-white text-text-dark border-b-2 border-r-2 border-primary/5 rounded-tl-none font-medium"
+                          ? "bg-emerald-600 text-white rounded-tr-none font-medium" 
+                          : "bg-white text-slate-700 border border-emerald-100 rounded-tl-none font-medium"
                       )}>
                         {msg.text}
                       </div>
                     </div>
                   ))}
                   {isLoading && (
-                    <div className="flex items-center gap-2 text-primary">
+                    <div className="flex items-center gap-2 text-emerald-600">
                       <Sparkles size={14} className="animate-spin" />
-                      <span className="text-[10px] font-black uppercase tracking-widest animate-pulse">Growing insights...</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest animate-pulse">Consulting the fields...</span>
                     </div>
                   )}
                 </div>
 
-                {/* Quick Actions */}
-                <div className="px-6 pb-2 mt-auto flex gap-2 overflow-x-auto hide-scrollbar whitespace-nowrap">
+                {/* Quick Actions - Green Pill Style */}
+                <div className="px-6 pb-2 mt-auto flex gap-2 overflow-x-auto no-scrollbar whitespace-nowrap">
                   {QUICK_ACTIONS.map((action, i) => (
                     <button
                       key={i}
                       onClick={() => handleSend(action.label)}
-                      className="bg-[#16A34A] border border-primary/10 px-3 py-1.5 rounded-pill text-[10px] font-bold text-primary flex items-center gap-1.5 hover:bg-primary hover:text-white transition-all shadow-sm"
+                      className="bg-white border border-emerald-200 px-3 py-1.5 rounded-full text-[10px] font-bold text-emerald-700 flex items-center gap-1.5 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all shadow-sm"
                     >
                       {action.icon} {action.label}
                     </button>
@@ -273,22 +264,24 @@ export const AIChatbot = () => {
                 </div>
 
                 {/* Input Area */}
-                <div className="p-4 bg-white border-t border-gray-50">
-                  <div className="bg-bg-warm rounded-2xl p-1.5 flex items-center gap-2 border border-primary/5 focus-within:border-primary/20 transition-all">
+                <div className="p-4 bg-white border-t border-emerald-50">
+                  <div className="bg-emerald-50/50 rounded-2xl p-1.5 flex items-center gap-2 border border-emerald-100 focus-within:border-emerald-300 focus-within:bg-white transition-all">
                     <input 
                       type="text"
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                      placeholder="Type your message..."
-                      className="flex-1 bg-transparent border-none outline-none px-4 py-2.5 text-sm font-medium"
+                      placeholder="Ask about crops or prices..."
+                      className="flex-1 bg-transparent border-none outline-none px-4 py-2.5 text-sm font-medium text-emerald-900 placeholder:text-emerald-300"
                     />
                     <button 
                       onClick={() => handleSend()}
                       disabled={!input.trim() || isLoading}
                       className={cn(
-                        "p-3 rounded-xl transition-all shadow-lg active:scale-95",
-                        !input.trim() || isLoading ? "bg-[#16A34A] text-gray-100" : "bg-primary text-white hover:bg-primary-light"
+                        "p-3 rounded-xl transition-all shadow-md active:scale-95",
+                        !input.trim() || isLoading 
+                          ? "bg-emerald-200 text-emerald-400 cursor-not-allowed" 
+                          : "bg-emerald-600 text-white hover:bg-emerald-700"
                       )}
                     >
                       <Send size={18} />
@@ -298,7 +291,7 @@ export const AIChatbot = () => {
 
                 {/* Resize Handle */}
                 <div 
-                  className="absolute bottom-1 right-1 w-4 h-4 cursor-nwse-resize flex items-center justify-center opacity-30 hover:opacity-100 transition-opacity"
+                  className="absolute bottom-1 right-1 w-4 h-4 cursor-nwse-resize flex items-center justify-center opacity-20 hover:opacity-100 transition-opacity"
                   onMouseDown={(e) => {
                     const startX = e.clientX;
                     const startY = e.clientY;
@@ -320,7 +313,7 @@ export const AIChatbot = () => {
                     document.addEventListener('mouseup', onMouseUp);
                   }}
                 >
-                  <Maximize2 size={12} className="rotate-90 text-gray-400" />
+                  <Maximize2 size={12} className="rotate-90 text-emerald-400" />
                 </div>
               </>
             )}
