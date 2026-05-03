@@ -68,7 +68,7 @@ function SearchBar() {
         <span className="text-[11px] font-black uppercase tracking-tighter whitespace-nowrap">{t.nearMe}</span>
       </button>
 
-      <button className="bg-slate-900 p-2.5 rounded-xl text-white ml-1 hover:bg-emerald-600 transition-all">
+      <button className="bg-slate-900 p-2.5 rounded-xl text-white ml-1 hover:bg-black/80 transition-all">
         <Search size={18} strokeWidth={2.5} />
       </button>
     </div>
@@ -197,7 +197,7 @@ export function Navbar({ cartCount = 0, isLoggedIn = false, userName = "Patel" }
           <SearchBar />
 
           <div className="flex items-center gap-2 sm:gap-4">
-            <button className="relative p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
+            <button className="relative p-2.5 text-slate-400 hover:text-black/90 hover:bg-emerald-50 rounded-xl transition-all">
               <Bell size={22} />
               <span className="absolute top-2.5 right-2.5 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white"></span>
             </button>
@@ -213,7 +213,7 @@ export function Navbar({ cartCount = 0, isLoggedIn = false, userName = "Patel" }
             <AccountDropdown isLoggedIn={isLoggedIn} userName={userName} />
 
             <a href="/cart" className="block">
-              <button className="relative p-3 bg-slate-900 text-white hover:bg-emerald-600 rounded-2xl transition-all shadow-lg shadow-slate-200">
+              <button className="relative p-3 bg-slate-900 text-white hover:bg-black/80 rounded-2xl transition-all shadow-lg shadow-slate-200">
                 <ShoppingCart size={22} />
                 {cartCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 bg-emerald-600 text-white text-[10px] font-black h-5 w-5 rounded-full flex items-center justify-center ring-4 ring-white shadow-lg">
