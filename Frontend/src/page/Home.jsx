@@ -198,7 +198,7 @@ const ALL_PRODUCTS = (t) => [
   },
   {
     id: 2,
-    name: "Savitri Devi",
+    name: "Lakshmi Narayanan",
     farmName: "Shakti Mahila Farms",
     location: "Karnal, Haryana",
     type: "Premium Grains",
@@ -242,7 +242,7 @@ const ALL_PRODUCTS = (t) => [
   },
   {
     id: 6,
-    name: "Lakshmi Narayanan",
+    name: "Savitri Devi",
     farmName: "Cauvery Delta Agri",
     location: "Thanjavur, Tamil Nadu",
     type: "Premium Ponni Rice",
@@ -412,236 +412,135 @@ useEffect(() => {
   </div>
 </section>
 
-
-{/* PREMIUM PRODUCT CARD */}
-<section className="max-w-7xl mx-auto px-4 md:px-6 py-16 bg-white">
-  <div className="flex justify-between items-end mb-12">
-    <h2 className="md:text-4xl text-2xl font-semibold tracking-tighter text-gray-900">
+{/* Product Card*/}
+<section className="max-w-[1500px] mx-auto px-4 py-8 bg-gray-100">
+  <div className="flex justify-between items-baseline mb-6 px-1">
+    <h2 className="text-xl font-bold tracking-tight text-gray-900">
       {t.all} {t.products}
     </h2>
-    <a href="/marketplace" className="text-sm font-medium flex items-center gap-2 hover:gap-3 transition-all group">
+    <a href="/marketplace" className="text-sm text-[#007185] hover:text-[#C7511F] hover:underline">
       {t.ViewAll}
-      <span className="text-xl group-hover:translate-x-1 transition">→</span>
     </a>
   </div>
 
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 lg:gap-8">
-    {ALL_PRODUCTS(t).map((product) => {
-      const rating = product.rating || 4.5;
-      const fullStars = Math.floor(rating);
-      const decimal = rating % 1;
-
-      // Farmer Image with Fallback
-      const farmerImage = product.farmerImg && product.farmerImg.trim() !== "" 
-        ? product.farmerImg 
-        : "https://media.istockphoto.com/id/512830984/photo/icon-man-on-a-white-background-3d-render.webp?a=1&b=1&s=612x612&w=0&k=20&c=r6Sx3TDUH8ERT43UvzRwFgo_VyD4WWjxNGrHCSos_68=";
-
-      return (
-        <div 
-          key={product.id} 
-          className="group relative bg-white rounded-3xl overflow-hidden border border-gray-100 hover:border-emerald-200 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full hover:-translate-y-3"
-        >
-          {/* Image Container */}
-          <div className="relative aspect-square overflow-hidden bg-gray-50">
-            <img 
-              src={product.img} 
-              className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110" 
-              alt={product.name} 
-            />
-            {/* Wishlist */}
-            <button className="absolute top-2 right-2 p-3 bg-white/90 backdrop-blur-md rounded-2xl shadow-md hover:bg-white hover:scale-110 active:scale-95 transition-all">
-              <Heart 
-                size={20} 
-                className={`transition-all ${product.id % 3 === 0 ? "fill-red-500 text-red-500" : "text-gray-400 group-hover:text-gray-600"}`} 
-              />
-            </button>
-          </div>
-
-          {/* Content */}
-          <div className="p-5 flex-1 flex flex-col">
-            {/* Farm & Farmer */}
-            <div className="flex items-center gap-2 mb-3">
-              <img 
-                src={farmerImage}
-                alt={product.farmerName || "Farmer"}
-                className="w-7 h-7 rounded-full object-cover ring-2 ring-white shadow"
-                onError={(e) => {
-                  e.target.src = "https://media.istockphoto.com/id/512830984/photo/icon-man-on-a-white-background-3d-render.webp?a=1&b=1&s=612x612&w=0&k=20&c=r6Sx3TDUH8ERT43UvzRwFgo_VyD4WWjxNGrHCSos_68=";
-                }}
-              />
-              <div className="text-xs">
-                <p className="font-medium text-gray-700 truncate">{product.farmerName}</p>
-                <p className="text-gray-400 text-[10px]">{product.farmName}</p>
-              </div>
-            </div>
-
-            {/* Product Name */}
-            <h3 className="font-semibold text-lg leading-tight text-gray-900 line-clamp-2 mb-4 group-hover:text-emerald-700 transition-colors">
-              {product.name}
-            </h3>
-
-            {/* Star Rating */}
-            <div className="flex items-center gap-1.5 mb-5">
-              <div className="flex text-2xl text-amber-400">
-                {[...Array(5)].map((_, index) => (
-                  <div key={index} className="relative">
-                    <span className="text-gray-200">★</span>
-                    <span 
-                      className="absolute top-0 left-0 overflow-hidden text-amber-400"
-                      style={{ 
-                        width: index < fullStars 
-                          ? '100%' 
-                          : index === fullStars 
-                            ? `${decimal * 100}%` 
-                            : '0%' 
-                      }}
-                    >
-                      ★
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <span className="text-sm font-medium text-gray-600 ml-2">{rating}/5.0 {t.rating || "Rating"}</span>
-            </div>
-
-            {/* Price */}
-            <div className="mt-auto">
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold tracking-tighter text-gray-900">
-                  ₹{product.price}
-                </span>
-                <span className="text-sm text-gray-400">/{t.kg || "kg"}</span>
-                <span className="text-gray-400 line-through text-sm ml-auto">
-                  ₹{Math.round(product.price * 1.25)}
-                </span>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 mt-6">
-              <button 
-                className="flex-1 bg-black hover:bg-black/80 text-white py-3.5 rounded-2xl text-sm font-semibold tracking-wider transition-all active:scale-[0.97] shadow-md"
-              >
-                 {t.addToCart || "Add to Cart"}
-              </button>
-
-              <Link 
-                to={`/detail/${product.id}`}
-                state={{ product: product }}
-                className="w-12 h-12 flex items-center justify-center border border-gray-200 rounded-2xl hover:border-emerald-600 hover:bg-emerald-50 transition-all"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </Link>
-            </div>
-          </div>
-
-          {/* Bottom Accent Line */}
-          <div className="h-1 bg-gradient-to-r from-emerald-500 to-teal-400 w-0 group-hover:w-full transition-all duration-700" />
-        </div>
-      );
-    })}
-  </div>
-</section>
-
-
-{/* PREMIUM TOP FARMERS SECTION */}
-<section className="max-w-7xl mx-auto px-4 md:px-6 py-16 bg-white">
-  <div>
-    <div className='flex justify-between items-end mb-12'>
-      <h2 className="md:text-4xl text-2xl font-semibold tracking-tighter text-gray-900">
-       {t.topFarmers}
-    </h2>
-    <a href="/farmers" className="text-sm font-medium flex items-center gap-2 hover:gap-3 transition-all group">
-      {t.MeetAllFarmers}
-      <span className="text-xl group-hover:translate-x-1 transition">→</span>
-    </a>
-    </div>
-  </div>
-
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 lg:gap-8">
-    {TOP_FARMERS(t).map((farmer) => (
-      <div 
-        key={farmer.id} 
-        className="group relative bg-white rounded-3xl overflow-hidden border border-gray-100 hover:border-emerald-200 hover:shadow-2xl transition-all duration-500 flex flex-col h-full hover:-translate-y-2"
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+    {ALL_PRODUCTS(t).map((product) => (
+      <Link
+        key={product.id}
+        to={`/detail/${product.id}`}
+        state={{ product: product }}
+        className="bg-white flex flex-col h-[320px] p-4 shadow-none hover:shadow-md transition-shadow duration-200"
       >
-        {/* Image Section */}
-        <div className="relative h-64 overflow-hidden">
-          <img 
-            src={farmer.img} 
-            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110" 
-            alt={farmer.name} 
+        <div className="h-[40px] mb-3 overflow-hidden">
+          <h3 className="text-sm font-bold text-gray-900 line-clamp-2 leading-tight">
+            {product.name}
+          </h3>
+        </div>
+
+        <div className="relative w-full h-[250px] bg-white flex items-center justify-center overflow-hidden">
+          <img
+            src={product.img}
+            alt={product.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.src = "https://media.istockphoto.com/id/2182219687/photo/online-advertising-concepts-to-target-customers-influencer-marketing-social-media.webp?a=1&b=1&s=612x612&w=0&k=20&c=DwRxJVvzERqtg5oDpv_1v7zjNolIdcjcbA7pjNSlkhk=";
+            }}
           />
         </div>
-
-        {/* Content */}
-        <div className="p-6 flex-1 flex flex-col">
-          <h3 className="text-[17px] font-semibold text-gray-900 group-hover:text-emerald-800 transition-colors leading-tight">
-            {farmer.name}
-          </h3>
-          
-          <p className="text-gray-500  font-medium mt-1 mb-4">{farmer.farmName}</p>
-
-          {/* Rating */}
-          <div className="flex items-center gap-2 mb-5">
-            <div className="flex text-amber-500 text-2xl leading-none">
-              ★★★★☆
-            </div>
-            <span className="font-semibold text-gray-700">{farmer.stars}</span>
-          </div>
-
-          {/* Details */}
-          <div className="space-y-3 mb-6 text-sm">
-            <div className="flex items-center gap-3 text-gray-600">
-              <MapPin size={18} className="text-gray-400" />
-              <span>{farmer.location}</span>
-            </div>
-            
-            <div className="flex items-center gap-3 text-gray-600">
-              <span className="text-emerald-600 font-semibold">🌱</span>
-              <span>{farmer.type}</span>
-            </div>
-          </div>
-
-         <Link
-          to={`/farmer-profile/${farmer.id}`}
-          state={{ farmer }}
-          >
-          <button className="mt-auto w-full bg-black hover:bg-black/80 text-white py-4 rounded-2xl font-semibold text-sm tracking-wider transition-all">
-          {t.viewfarmprofile}
-        </button>
-        </Link>
-        </div>
-
-        {/* Premium Hover Accent */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-600 scale-x-0 group-hover:scale-x-100 transition-all duration-700" />
-      </div>
+      </Link>
     ))}
   </div>
 </section>
 
-      {/* 3. FARMER STORIES / STORIES SECTION */}
-      <section className="max-w-7xl mx-auto px-6 py-12">
-        <div className="bg-white rounded-[4rem] p-12 md:p-20 shadow-xl shadow-slate-200/50 border border-gray-50 flex flex-col lg:flex-row items-center gap-16">
-          <div className="flex-1 space-y-8">
-            <h2 className="text-5xl font-black text-gray-900 leading-tight">
-              {t.farmerStories} <br/> <span className="text-green-600 underline decoration-wavy decoration-green-200">{t.verifiedFarmer}</span>
-            </h2>
-            <p className="text-xl text-gray-500 font-medium leading-relaxed">
-              Every purchase helps a local farmer from Bhopal grow their business. 100% of the price goes directly to them.
-            </p>
-            <a href="/farmers" className="inline-flex items-center gap-3 bg-gray-900 text-white px-10 py-5 rounded-2xl font-black text-lg hover:bg-black/80 transition-all group">
-              {t.viewAll} {t.farmer} <ArrowRight className="group-hover:translate-x-2 transition-transform" />
-            </a>
-          </div>
-          <div className="flex-1 grid grid-cols-2 gap-6 w-full">
-            <img src="https://plus.unsplash.com/premium_photo-1682092792260-1b7cd1674a74?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" className="w-full h-64 object-cover rounded-[2.5rem] shadow-lg" alt="Farmer" />
-            <img src="https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=400" className="w-full h-64 object-cover rounded-[2.5rem] shadow-lg mt-12" alt="Farmer" />
-          </div>
-        </div>
-      </section>
+{/*FARMERS Card */}
+<section className="max-w-[1500px] mx-auto px-4 py-8 bg-gray-100">
+  <div className="flex justify-between items-baseline mb-6 px-1">
+    <h2 className="text-xl font-bold tracking-tight text-gray-900">
+      {t.topFarmers}
+    </h2>
+    <a href="/farmers" className="text-sm text-[#007185] hover:text-[#C7511F] hover:underline">
+      {t.MeetAllFarmers}
+    </a>
+  </div>
 
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+    {TOP_FARMERS(t).map((farmer) => (
+      <Link
+        key={farmer.id}
+        to={`/farmer-profile/${farmer.id}`}
+        state={{ farmer }}
+        className="bg-white flex flex-col h-[320px] p-4 shadow-none hover:shadow-md transition-shadow duration-200"
+      >
+        <div className="h-[45px] mb-3 overflow-hidden">
+          <h3 className="text-sm font-bold text-gray-900 line-clamp-1 leading-tight">
+            {farmer.name}
+          </h3>
+          <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+            {farmer.farmName}
+          </p>
+        </div>
+
+        <div className="relative w-full h-[200px] bg-white flex items-center justify-center overflow-hidden">
+          <img
+            src={farmer.img}
+            alt={farmer.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.src = "https://media.istockphoto.com/id/512830984/photo/icon-man-on-a-white-background-3d-render.webp?a=1&b=1&s=612x612&w=0&k=20&c=r6Sx3TDUH8ERT43UvzRwFgo_VyD4WWjxNGrHCSos_68=";
+            }}
+          />
+        </div>
+      </Link>
+    ))}
+  </div>
+</section>
+{/* AMAZON STYLE FARMER STORIES SECTION */}
+<section className="bg-gray-100 py-10">
+  <div className="max-w-[1500px] mx-auto px-4">
+    {/* Clean, Sharp White Card Container */}
+    <div className="bg-white p-8 md:p-12 flex flex-col lg:flex-row items-center gap-12">
+      
+      {/* Left Content: Clean & Bold */}
+      <div className="flex-1 space-y-6">
+        <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
+          {t.farmerStories} — <span className="text-[#c45500]">{t.verifiedFarmer}</span>
+        </h2>
+        
+        <p className="text-lg text-gray-700 leading-snug max-w-xl">
+          Every purchase helps a local farmer from Bhopal grow their business. 100% of the price goes directly to them.
+        </p>
+
+        <div className="pt-4">
+          <a 
+            href="/farmerplace" 
+            className="inline-block bg-black border border-[#FCD200] text-white px-8 py-2.5 text-sm font-medium hover:bg-black/85 shadow-sm transition-all"
+          >
+            {t.viewAll} {t.farmer}
+          </a>
+          <p className="text-xs text-gray-500 mt-2 italic">*Supporting local agriculture since 2026</p>
+        </div>
+      </div>
+
+      {/* Right Content: Clean Image Grid (No Offset, No Rounding) */}
+      <div className="flex-1 grid grid-cols-2 gap-6 w-full items-center">
+        <div className="h-72 overflow-hidden">
+          <img 
+            src="https://plus.unsplash.com/premium_photo-1682092792260-1b7cd1674a74?q=80&w=687&auto=format&fit=crop" 
+            className="w-full h-full object-cover transition-transform hover:scale-105 duration-500" 
+            alt="Farmer" 
+          />
+        </div>
+        <div className="h-72 overflow-hidden mt-20">
+          <img 
+            src="https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=400" 
+            className="w-full h-full object-cover transition-transform hover:scale-105 duration-500" 
+            alt="Farmer" 
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
     </div>
   );
 }

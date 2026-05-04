@@ -15,10 +15,12 @@ const Footer = () => {
               <div className="w-10 h-10 bg-[#16A34A] rounded-2xl flex items-center justify-center">
                 <Leaf className="w-6 h-6 text-white" />
               </div>
-              <h2 className="text-3xl font-bold tracking-tight">
+             <a href="/">
+               <h2 className="text-3xl font-bold tracking-tight">
                 <span className="text-[#16A34A]">{t.kisan}</span>
                 <span className="text-white">{t.mitra}</span>
               </h2>
+             </a>
             </div>
             
             <p className="text-gray-400 text-[15px] leading-relaxed max-w-md">
@@ -37,9 +39,8 @@ const Footer = () => {
             <h3 className="text-white font-semibold mb-5 tracking-wide">{t.quickLinks}</h3>
             <ul className="space-y-3 text-sm">
               <li><a href="/" className="hover:text-white transition-colors">{t.home}</a></li>
-              <li><a href="/products" className="hover:text-white transition-colors">{t.products}</a></li>
-              <li><a href="/categories" className="hover:text-white transition-colors">Categories</a></li>
-              <li><a href="/sell" className="hover:text-white transition-colors">{t.sell}</a></li>
+              <li><a href="/marketplace" className="hover:text-white transition-colors">{t.products}</a></li>
+              <li><a href="/marketplace" className="hover:text-white transition-colors">{t.categories}</a></li>
               <li><a href="/orders" className="hover:text-white transition-colors">{t.orders}</a></li>
             </ul>
           </div>
@@ -50,7 +51,7 @@ const Footer = () => {
             <ul className="space-y-3 text-sm">
               <li><a href="/about" className="hover:text-white transition-colors">{t.aboutUs}</a></li>
               <li><a href="/contact" className="hover:text-white transition-colors">{t.contactUs}</a></li>
-              <li><a href="/careers" className="hover:text-white transition-colors">{t.careers}</a></li>
+              <li><a href="/impact" className="hover:text-white transition-colors">{t.impact}</a></li>
               <li><a href="/blog" className="hover:text-white transition-colors">{t.blog}</a></li>
             </ul>
           </div>
@@ -59,10 +60,8 @@ const Footer = () => {
           <div className="lg:col-span-2">
             <h3 className="text-white font-semibold mb-5 tracking-wide">{t.support}</h3>
             <ul className="space-y-3 text-sm">
-              <li><a href="/help" className="hover:text-white transition-colors">{t.helpCenter}</a></li>
               <li><a href="/faqs" className="hover:text-white transition-colors">{t.faqs}</a></li>
               <li><a href="/terms" className="hover:text-white transition-colors">{t.termsConditions}</a></li>
-              <li><a href="/privacy" className="hover:text-white transition-colors">{t.privacyPolicy}</a></li>
               <li><a href="/refund" className="hover:text-white transition-colors">{t.refundPolicy}</a></li>
             </ul>
           </div>

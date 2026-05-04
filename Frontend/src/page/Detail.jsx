@@ -253,7 +253,9 @@ export default function Detail() {
               src={farmerImage}
               alt={product.farmerName || "Farmer"}
               className="w-7 h-7 rounded-full object-cover ring-2 ring-white shadow"
-              onError={(e) => { e.target.src = "https://media.istockphoto.com/id/512830984/photo/icon-man-on-a-white-background-3d-render.webp?a=1&b=1&s=612x612&w=0&k=20&c=r6Sx3TDUH8ERT43UvzRwFgo_VyD4WWjxNGrHCSos_68="; }} 
+              onError={(e) => {
+                 e.target.src = "https://media.istockphoto.com/id/512830984/photo/icon-man-on-a-white-background-3d-render.webp?a=1&b=1&s=612x612&w=0&k=20&c=r6Sx3TDUH8ERT43UvzRwFgo_VyD4WWjxNGrHCSos_68=";
+                }} 
             />
             <div>
               <p className="text-xs text-gray-400 font-semibold uppercase">{t.sourcedFrom || "Sourced From"}</p>
@@ -364,7 +366,13 @@ export default function Detail() {
 
                   <div className="p-5 flex-1 flex flex-col">
                     <div className="flex items-center gap-2 mb-3">
-                      <img src={item.farmerImg || farmerImage} className="w-7 h-7 rounded-full object-cover" alt={item.farmerName} />
+                      <img src={item.farmerImg || farmerImage} 
+                        className="w-7 h-7 rounded-full object-cover" 
+                        alt={item.farmerName}
+                        onError={(e) => {
+                        e.target.src = "https://media.istockphoto.com/id/512830984/photo/icon-man-on-a-white-background-3d-render.webp?a=1&b=1&s=612x612&w=0&k=20&c=r6Sx3TDUH8ERT43UvzRwFgo_VyD4WWjxNGrHCSos_68=";
+                       }} 
+                       />
                       <div className="text-xs">
                         <p className="font-medium text-gray-700 truncate">{item.farmerName}</p>
                         <p className="text-gray-400 text-[10px]">{item.farmName}</p>

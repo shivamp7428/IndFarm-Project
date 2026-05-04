@@ -1,37 +1,56 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Leaf,
-  ShoppingCart,
-  Package,
-  Search,
-  MapPin,
-  Menu,
-  X,
-  User,
-  ChevronRight,
-  ChevronDown,
-  Home,
-  ShoppingBag,
-  Settings,
-  LogOut,
-  Info,
-  LayoutDashboard,
-  Globe,
-  Bell,
-} from "lucide-react";
+import { Leaf, ShoppingCart, Package, Search, MapPin, Menu, X, User, ChevronRight, ChevronDown, Home, ShoppingBag, Settings, LogOut, Info, LayoutDashboard, Globe,Bell,} from "lucide-react";
 import { useTranslation } from "../context/LanguageContext";
 
-const categories = [
-  "Vegetables",
-  "Fruits",
-  "Grains",
-  "Dairy",
-  "Organic",
-  "Offers",
-  "Farmer Stories",
-];
+function CustomSelect() {
+  const { translations: t } = useTranslation();
+  const [isOpen, setIsOpen] = useState(false);
+  const [selected, setSelected] = useState(t.all || "All");
+  const selectRef = useRef(null);
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (selectRef.current && !selectRef.current.contains(e.target)) setIsOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const options = [t.all, t.vegetables, t.fruits, t.grains, t.dairy];
+
+  return (
+    <div className="relative" ref={selectRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 px-4 py-2 text-[11px] font-black uppercase tracking-widest text-slate-700 hover:text-emerald-600 transition-colors outline-none"
+      >
+        {selected}
+        <ChevronDown size={12} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-emerald-100 rounded-xl shadow-xl z-[120] overflow-hidden py-1">
+          {options.map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => {
+                setSelected(opt);
+                setIsOpen(false);
+              }}
+              className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function SearchBar() {
   const { translations: t } = useTranslation();
@@ -39,14 +58,9 @@ function SearchBar() {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <div className="flex-1 max-w-2xl hidden md:flex items-center bg-slate-50 border border-emerald-100 rounded-2xl p-1 focus-within:ring-4 ring-emerald-500/10 focus-within:border-emerald-500 transition-all duration-300">
-      <select className="bg-transparent text-xs font-bold px-4 outline-none text-emerald-800 cursor-pointer appearance-none uppercase tracking-wider">
-        <option>{t.all}</option>
-        <option>{t.vegetables}</option>
-        <option>{t.fruits}</option>
-        <option>{t.grains}</option>
-        <option>{t.dairy}</option>
-      </select>
+    <div className="flex-1 max-w-3xl hidden md:flex items-center bg-slate-50 border border-emerald-100 rounded-2xl p-1 focus-within:ring-4 ring-emerald-500/10 focus-within:border-emerald-500 transition-all duration-300 mx-6">
+      
+      <CustomSelect />
 
       <div className="h-5 w-px bg-emerald-100 mx-1" aria-hidden="true" />
 
@@ -75,6 +89,7 @@ function SearchBar() {
   );
 }
 
+
 function AccountDropdown({ isLoggedIn, userName }) {
   const { lang, toggleLanguage, translations: t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -90,7 +105,7 @@ function AccountDropdown({ isLoggedIn, userName }) {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-3 p-1.5 pr-3 hover:bg-slate-50 rounded-2xl transition-all">
+      <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-2xl transition-all">
         <div className="lg:hidden h-10 w-10 bg-emerald-100 flex items-center justify-center rounded-xl text-emerald-700">
           <User size={20} />
         </div>
@@ -99,7 +114,7 @@ function AccountDropdown({ isLoggedIn, userName }) {
             {isLoggedIn ? `${t.hello}, ${userName}` : "Hello, Sign in"}
           </p>
           <p className="text-sm font-black text-slate-800 flex items-center gap-1">
-            {t.account} & Lists <ChevronDown size={14} className={isOpen ? "rotate-180" : ""} />
+            {t.account} <ChevronDown size={14} className={isOpen ? "rotate-180" : ""} />
           </p>
         </div>
       </button>
@@ -113,18 +128,33 @@ function AccountDropdown({ isLoggedIn, userName }) {
                </a>
              </div>
           )}
-          <div className="space-y-1">
-            <button onClick={toggleLanguage} className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
-              <div className="flex items-center gap-3"><Globe size={16} /> <span>{t.language}</span></div>
-              <span className="text-[10px] font-black text-emerald-600">{lang === "en" ? "EN" : "HI"}</span>
-            </button>
-            <a href="/dashboard" className="block">
-              <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600"><LayoutDashboard size={16}/> {t.dashboard}</button>
-            </a>
-            <a href="/orders" className="block">
-              <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600"><Package size={16}/> {t.orders}</button>
-            </a>
-          </div>
+         <div className="space-y-1">
+  <button
+    onClick={toggleLanguage}
+    className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600"
+  >
+    <div className="flex items-center gap-3">
+      <Globe size={16} /> <span>{t.language}</span>
+    </div>
+    <span className="text-[10px] font-black text-emerald-600">
+      {lang === "en" ? "EN" : "HI"}
+    </span>
+  </button>
+
+  {isLoggedIn && (
+    <a href="/dashboard" className="block">
+      <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
+        <LayoutDashboard size={16} /> {t.dashboard}
+      </button>
+    </a>
+  )}
+
+  <a href="/orders" className="md:hidden block">
+    <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
+      <Package size={16} /> {t.orders}
+    </button>
+  </a>
+         </div>
         </div>
       )}
     </div>
@@ -181,38 +211,48 @@ export function Navbar({ cartCount = 0, isLoggedIn = false, userName = "Patel" }
   return (
     <>
       <nav className="sticky top-0 z-[100] w-full bg-white/90 backdrop-blur-xl border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between gap-4">
+        {/* max-w-full and px-2 to keep it touch-to-edge but with internal padding */}
+        <div className="max-w-full mx-auto px-2 py-3 flex items-center justify-between">
           
           <button className="md:hidden p-2.5 bg-slate-100 rounded-xl text-slate-600" onClick={() => setMobileMenuOpen(true)}>
             <Menu size={20} strokeWidth={2.5} />
           </button>
 
-          <div className="flex items-center gap-3 shrink-0 cursor-pointer">
-            <div className="bg-slate-900 p-2.5 rounded-2xl text-white shadow-xl shadow-slate-200">
-              <Leaf size={22} fill="currentColor" />
+          <div className="flex items-center gap-2 shrink-0 cursor-pointer ml-2">
+            <div className="bg-slate-900 p-2 rounded-2xl text-white shadow-xl shadow-slate-200">
+              <Leaf size={20} fill="currentColor" />
             </div>
-            <a href="/"><span className="text-2xl font-black text-slate-900 tracking-tighter">{t.kisan}<span className="text-emerald-600">{t.mitra}</span></span></a>
+            <a href="/"><span className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter">{t.kisan}<span className="text-emerald-600">{t.mitra}</span></span></a>
           </div>
 
           <SearchBar />
 
-          <div className="flex items-center gap-2 sm:gap-4">
-            <button className="relative p-2.5 text-slate-400 hover:text-black/90 hover:bg-emerald-50 rounded-xl transition-all">
-              <Bell size={22} />
-              <span className="absolute top-2.5 right-2.5 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+          <div className="flex items-center gap-1 sm:gap-4 mr-2">
+            <a href="/notification">
+              <button className="relative p-2 text-slate-400 hover:text-black/90 hover:bg-emerald-50 rounded-xl transition-all">
+              <Bell size={20} />
+              <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white"></span>
             </button>
+            </a>
 
             <button
               onClick={toggleLanguage}
-              className="hidden md:flex items-center gap-2 px-3 py-1.5 border border-slate-100 rounded-xl text-[10px] font-black text-slate-600 hover:bg-emerald-50 transition-all uppercase tracking-widest"
+              className="hidden md:flex items-center gap-2 px-2 py-1.5 border border-slate-100 rounded-xl text-[10px] font-black text-slate-600 hover:bg-emerald-50 transition-all uppercase tracking-widest"
             >
               <Globe size={14} strokeWidth={2.5} />
               {lang === "en" ? "हिन्दी" : "ENG"}
             </button>
 
+            <a href="/orders" className="hidden lg:block">
+              <button className="flex flex-col items-start px-2 py-1 hover:bg-slate-50 rounded-xl transition-all text-left">
+                <span className="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">Returns</span>
+                <span className="text-sm font-black text-slate-800 tracking-tight">& Orders</span>
+              </button>
+            </a>
+
             <AccountDropdown isLoggedIn={isLoggedIn} userName={userName} />
 
-            <a href="/cart" className="block">
+            <a href="/cart" className="block ml-1">
               <button className="relative p-3 bg-slate-900 text-white hover:bg-black/80 rounded-2xl transition-all shadow-lg shadow-slate-200">
                 <ShoppingCart size={22} />
                 {cartCount > 0 && (
