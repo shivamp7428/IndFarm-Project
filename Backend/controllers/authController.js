@@ -30,6 +30,7 @@ export const signup = async (req, res) => {
       user: {
         id: newUser._id,
         fullName: newUser.fullName,
+        role: newUser.role,
         farmImageUrl: newUser.farmImageUrl 
       }
     });
@@ -76,12 +77,18 @@ export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password"); 
     if (!user) {
-      return res.status(404).json({ message: "User nahi mila" });
+      return res.status(404).json({ success: false, message: "User nahi mila" });
     }
-
-   return res.status(200).json(user);
+    return res.status(200).json({
+      success: true,
+      user: user
+    });
   } catch (error) {
-   return res.status(500).json({ message: "Server error", error: error.message });
+    return res.status(500).json({ 
+      success: false, 
+      message: "Server error", 
+      error: error.message 
+    });
   }
 };
 

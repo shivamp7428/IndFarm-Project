@@ -8,7 +8,20 @@ import {
 } from "lucide-react";
 import { useTranslation } from "../context/LanguageContext";
 
-// --- Helper Components ---
+function decodeJWT(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    console.error("JWT Decode Error:", e);
+    return null;
+  }
+}
+
 
 function CustomSelect() {
   const { translations: t } = useTranslation();
@@ -17,9 +30,9 @@ function CustomSelect() {
   const selectRef = useRef(null);
 
   useEffect(() => {
-    function handleClick(e) {
+    const handleClick = (e) => {
       if (selectRef.current && !selectRef.current.contains(e.target)) setIsOpen(false);
-    }
+    };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
@@ -42,11 +55,7 @@ function CustomSelect() {
           {options.map((opt) => (
             <button
               key={opt}
-              type="button"
-              onClick={() => {
-                setSelected(opt);
-                setIsOpen(false);
-              }}
+              onClick={() => { setSelected(opt); setIsOpen(false); }}
               className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
             >
               {opt}
@@ -90,22 +99,27 @@ function SearchBar() {
   );
 }
 
-function AccountDropdown({ isLoggedIn, userName, onLogout }) {
+function AccountDropdown({ isLoggedIn, userName, user, onLogout }) {
   const { lang, toggleLanguage, translations: t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
+  const userId = user?.id || user?._id;
+
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsOpen(false);
-    }
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsOpen(false);
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-2xl transition-all">
+      <button 
+        onClick={() => setIsOpen(!isOpen)} 
+        className="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-2xl transition-all"
+      >
         <div className="lg:hidden h-10 w-10 bg-emerald-100 flex items-center justify-center rounded-xl text-emerald-700">
           <User size={20} />
         </div>
@@ -129,34 +143,39 @@ function AccountDropdown({ isLoggedIn, userName, onLogout }) {
             </div>
           ) : (
             <div className="px-3 pb-2 mb-2 border-b border-slate-50">
-               <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Active Session</p>
+              <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Active Session</p>
             </div>
           )}
           
           <div className="space-y-1">
-            <button onClick={toggleLanguage} className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
+            <button 
+              onClick={toggleLanguage} 
+              className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600"
+            >
               <div className="flex items-center gap-3"><Globe size={16} /> <span>{t.language}</span></div>
-              <span className="text-[10px] font-black text-emerald-600">{lang === "en" ? "EN" : "HI"}</span>
+              <span className="text-[10px] font-black text-emerald-600">{lang === "en" ? "HI" : "EN"}</span>
             </button>
 
-            {isLoggedIn && (
-              <>
-                <a href="/dashboard" className="block">
-                  <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
-                    <LayoutDashboard size={16} /> {t.dashboard}
-                  </button>
-                </a>
-                <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 rounded-xl text-sm font-bold text-red-600">
-                  <LogOut size={16} /> Logout
+            {isLoggedIn && userId && (
+              <a 
+                href={user?.role === "farmer" ? `/farmer-dashboard/${userId}` : `/user-dashboard/${userId}`} 
+                className="block"
+              >
+                <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
+                  <LayoutDashboard size={16} /> 
+                  {t.dashboard}
                 </button>
-              </>
+              </a>
             )}
 
-            <a href="/orders" className="md:hidden block">
-              <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
-                <Package size={16} /> {t.orders}
+            {isLoggedIn && (
+              <button 
+                onClick={onLogout} 
+                className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 rounded-xl text-sm font-bold text-red-600"
+              >
+                <LogOut size={16} /> {t.logout}
               </button>
-            </a>
+            )}
           </div>
         </div>
       )}
@@ -164,48 +183,71 @@ function AccountDropdown({ isLoggedIn, userName, onLogout }) {
   );
 }
 
-function MobileMenu({ isOpen, setIsOpen, userName, isLoggedIn, onLogout }) {
+function MobileMenu({ isOpen, setIsOpen, userName, isLoggedIn, user, onLogout }) {
   const { lang, toggleLanguage, translations: t } = useTranslation();
-  
+  const userId = user?.id || user?._id;
+
   const navItems = [
-    { name: `${t.home}`, icon: Home, link: "/" },
-    { name: `${t.shopcategories}`, icon: ShoppingBag, link: "/categories" },
-    { name: `${t.myorders}`, icon: Package, link: "/orders" },
-    ...(isLoggedIn ? [{ name: "Dashboard", icon: LayoutDashboard, link: "/dashboard" }] : []),
-    { name: `${t.settings}`, icon: Settings, link: "/settings" },
-    { name: `${t.aboutkisanmitra}`, icon: Info, link: "/about" },
+    { name: t.home, icon: Home, link: "/" },
+    { name: t.shopcategories, icon: ShoppingBag, link: "/categories" },
+    { name: t.myorders, icon: Package, link: "/orders" },
+    ...(isLoggedIn && userId ? [{
+      name: user.role === "farmer" ? t.farmerDashboard : t.userDashboard,
+      icon: LayoutDashboard,
+      link: user.role === "farmer" ? `/farmer-dashboard/${userId}` : `/user-dashboard/${userId}`
+    }] : []),
+    { name: t.settings, icon: Settings, link: "/settings" },
+    { name: t.aboutkisanmitra, icon: Info, link: "/about" },
   ];
 
   return (
     <>
-      <div className={`fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[150] transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`} onClick={() => setIsOpen(false)} />
-      <div className={`fixed top-0 left-0 h-full w-[300px] bg-white z-[160] shadow-2xl transform transition-transform duration-500 ease-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <div className={`fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[150] transition-opacity ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`} onClick={() => setIsOpen(false)} />
+      
+      <div className={`fixed top-0 left-0 h-full w-[300px] bg-white z-[160] shadow-2xl transform transition-transform duration-500 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="bg-slate-900 text-white p-6 rounded-br-[2.5rem]">
           <div className="flex justify-between items-center mb-6">
-            <div className="h-12 w-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg"><User size={24} /></div>
-            <button onClick={() => setIsOpen(false)} className="h-10 w-10 flex items-center justify-center bg-white/10 rounded-xl"><X size={24} /></button>
+            <div className="h-12 w-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg">
+              <User size={24} />
+            </div>
+            <button onClick={() => setIsOpen(false)} className="h-10 w-10 flex items-center justify-center bg-white/10 rounded-xl">
+              <X size={24} />
+            </button>
           </div>
-          <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">{isLoggedIn ? t.hello : t.welcome}</p>
+          <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">
+            {isLoggedIn ? t.hello : t.welcome}
+          </p>
           <a href={isLoggedIn ? "/profile" : "/auth"} onClick={() => setIsOpen(false)}>
             <p className="text-xl font-black">{isLoggedIn ? userName : t.signin}</p>
           </a>
         </div>
+
         <nav className="py-6">
           <button onClick={toggleLanguage} className="w-full flex items-center justify-between px-8 py-4 hover:bg-slate-50 border-b border-slate-50">
-            <div className="flex items-center gap-4"><Globe size={20} className="text-emerald-600" /> <span className="font-bold text-slate-700 text-sm">{t.language}</span></div>
-            <span className="text-xs font-black text-emerald-600">{lang === "en" ? "हिन्दी" : "English"}</span>
+            <div className="flex items-center gap-4">
+              <Globe size={20} className="text-emerald-600" /> 
+              <span className="font-bold text-slate-700 text-sm">{t.language}</span>
+            </div>
+            <span className="text-xs font-black text-emerald-600">
+              {lang === "en" ? "हिन्दी" : "English"}
+            </span>
           </button>
+
           {navItems.map((item) => (
             <a href={item.link} key={item.name} onClick={() => setIsOpen(false)} className="block">
               <button className="w-full flex items-center justify-between px-8 py-4 hover:bg-slate-50 text-slate-700">
-                <div className="flex items-center gap-4"><item.icon size={20} className="text-slate-400" /> <span className="font-bold text-sm">{item.name}</span></div>
+                <div className="flex items-center gap-4">
+                  <item.icon size={20} className="text-slate-400" /> 
+                  <span className="font-bold text-sm">{item.name}</span>
+                </div>
                 <ChevronRight size={16} className="text-slate-300" />
               </button>
             </a>
           ))}
+
           {isLoggedIn && (
             <button onClick={onLogout} className="w-full flex items-center gap-4 px-8 py-4 hover:bg-red-50 text-red-600 mt-2">
-              <LogOut size={20} /> <span className="font-bold text-sm">Logout</span>
+              <LogOut size={20} /> <span className="font-bold text-sm">{t.logout}</span>
             </button>
           )}
         </nav>
@@ -214,29 +256,45 @@ function MobileMenu({ isOpen, setIsOpen, userName, isLoggedIn, onLogout }) {
   );
 }
 
-// --- Main Navbar Component ---
+// MAIN NAVBAR 
 
 export function Navbar({ cartCount = 0 }) {
-  const { lang, toggleLanguage, translations: t } = useTranslation();
+  const { translations: t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
-  // States for Authentication
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
+  const [user, setUser] = useState(null);
+  const { lang, toggleLanguage} = useTranslation();
 
-  // Logic to detect user on load
   useEffect(() => {
     const token = localStorage.getItem("token");
     const userStr = localStorage.getItem("user");
-    
-    if (token && userStr) {
+
+    let currentUser = null;
+
+    if (userStr) {
       try {
-        const user = JSON.parse(userStr);
-        setIsLoggedIn(true);
-        setUserName(user.fullName || "User");
+        currentUser = JSON.parse(userStr);
       } catch (e) {
-        console.error("User data parse error");
+        console.error("User parse error");
       }
+    }
+
+    if (!currentUser && token) {
+      const decoded = decodeJWT(token);
+      if (decoded?.id) {
+        currentUser = {
+          id: decoded.id,
+          role: decoded.role,
+          fullName: "User"
+        };
+      }
+    }
+
+    if (currentUser && token) {
+      setUser(currentUser);
+      setIsLoggedIn(true);
+      setUserName(currentUser.fullName || currentUser.name || "User");
     }
   }, []);
 
@@ -244,6 +302,8 @@ export function Navbar({ cartCount = 0 }) {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setIsLoggedIn(false);
+    setUser(null);
+    setUserName("");
     window.location.href = "/";
   };
 
@@ -260,7 +320,11 @@ export function Navbar({ cartCount = 0 }) {
             <div className="bg-slate-900 p-2 rounded-2xl text-white shadow-xl shadow-slate-200">
               <Leaf size={20} fill="currentColor" />
             </div>
-            <a href="/"><span className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter">{t.kisan}<span className="text-emerald-600">{t.mitra}</span></span></a>
+            <a href="/">
+              <span className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter">
+                {t.kisan}<span className="text-emerald-600">{t.mitra}</span>
+              </span>
+            </a>
           </div>
 
           <SearchBar />
@@ -273,19 +337,28 @@ export function Navbar({ cartCount = 0 }) {
               </button>
             </a>
 
-            <button onClick={toggleLanguage} className="hidden md:flex items-center gap-2 px-2 py-1.5 border border-slate-100 rounded-xl text-[10px] font-black text-slate-600 hover:bg-emerald-50 transition-all uppercase tracking-widest">
+            {/* Language Toggle*/}
+            <button 
+              onClick={toggleLanguage} 
+              className="hidden md:flex items-center gap-2 px-2 py-1.5 border border-slate-100 rounded-xl text-[10px] font-black text-slate-600 hover:bg-emerald-50 transition-all uppercase tracking-widest"
+            >
               <Globe size={14} strokeWidth={2.5} />
               {lang === "en" ? "हिन्दी" : "ENG"}
             </button>
 
             <a href="/orders" className="hidden lg:block">
               <button className="flex flex-col items-start px-2 py-1 hover:bg-slate-50 rounded-xl transition-all text-left">
-                <span className="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">Returns</span>
-                <span className="text-sm font-black text-slate-800 tracking-tight">& Orders</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">{t.return}</span>
+                <span className="text-sm font-black text-slate-800 tracking-tight">& {t.order}</span>
               </button>
             </a>
 
-            <AccountDropdown isLoggedIn={isLoggedIn} userName={userName} onLogout={handleLogout} />
+            <AccountDropdown 
+              isLoggedIn={isLoggedIn} 
+              userName={userName} 
+              user={user}
+              onLogout={handleLogout} 
+            />
 
             <a href="/cart" className="block ml-1">
               <button className="relative p-3 bg-slate-900 text-white hover:bg-black/80 rounded-2xl transition-all shadow-lg shadow-slate-200">
@@ -312,7 +385,8 @@ export function Navbar({ cartCount = 0 }) {
         isOpen={mobileMenuOpen} 
         setIsOpen={setMobileMenuOpen} 
         userName={userName} 
-        isLoggedIn={isLoggedIn} 
+        isLoggedIn={isLoggedIn}
+        user={user}
         onLogout={handleLogout}
       />
     </>

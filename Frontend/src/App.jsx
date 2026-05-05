@@ -18,30 +18,82 @@ import FAQPage from "./page/FAQ";
 import TermsPage from "./page/Terms";
 import RefundPage from "./page/Refund";
 
+import PrivateRoute from "./route/PrivateRoute"; 
+import PublicRoute from "./route/PublicRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
+import FarmerDashboard from "./page/FarmerDashboard";
+import UserDashboard from "./page/UserDashboard";
+
 function App() {
   return (
     <>
-     <ScrollToTop/>
+      <ScrollToTop />
       <Navbar />
       <Routes>
-        <Route path="/" element={<Home/>} />
-        <Route path="/about" element={<AboutPage/>} />
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/impact" element={<ImpactPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/faqs" element={<FAQPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/refund" element={<RefundPage />} />
-        <Route path="/notification" element={<NotificationsPage/>}/>
-         <Route path="/cart" element={<CartPage />} />
-        <Route path="/detail/:id" element={<Detail/>}/>
-        <Route path="/farmer-profile/:id" element={<FarmerProfile/>} />
+        <Route path="/detail/:id" element={<Detail />} />
+        <Route path="/farmer-profile/:id" element={<FarmerProfile />} />
+
+        <Route 
+          path="/auth" 
+          element={
+            <PublicRoute>
+              <AuthPage />
+            </PublicRoute>
+          } 
+        />
+
+        <Route 
+          path="/orders" 
+          element={
+            <PrivateRoute>
+              <OrdersPage />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/notification" 
+          element={
+            <PrivateRoute>
+              <NotificationsPage />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/cart" 
+          element={
+            <PrivateRoute>
+              <CartPage />
+            </PrivateRoute>
+          } 
+        />
+        
+        <Route path="/farmer-dashboard/:id" 
+            element={
+             <ProtectedRoute allowedRoles={["farmer"]}>
+               <FarmerDashboard />
+            </ProtectedRoute>
+             } 
+        />
+
+        <Route path="/user-dashboard/:id" 
+           element={
+             <ProtectedRoute allowedRoles={["customer", "user"]}>
+             <UserDashboard />
+             </ProtectedRoute>
+          } 
+        />
       </Routes>
-       
+
       <AIChatbot />
-      <Footer/>
+      <Footer />
     </>
   );
 }

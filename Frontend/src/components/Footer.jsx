@@ -88,25 +88,6 @@ const Footer = () => {
                 <span className="text-sm">support@kisanmitra.in</span>
               </div>
             </div>
-
-            {/* Newsletter */}
-            <div>
-              <h4 className="text-white font-medium mb-3">{t.stayUpdated}</h4>
-              <p className="text-xs text-gray-400 mb-4">
-                Get fresh produce alerts, price updates &amp; seasonal offers
-              </p>
-              
-              <div className="flex">
-                <input
-                  type="email"
-                  placeholder="Your email address"
-                  className="bg-[#1F2937] border border-gray-700 focus:border-[#16A34A] rounded-l-2xl px-5 py-3 text-sm flex-1 outline-none transition-colors"
-                />
-                <button className="bg-[#16A34A] hover:bg-[#15803D] px-6 rounded-r-2xl font-semibold text-sm transition-all active:scale-95">
-                  {t.subscribe}
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -115,7 +96,7 @@ const Footer = () => {
       <div className="border-t border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
           <div className="text-gray-400">
-            © 2026 KisanMitra. {t.allRightsReserved}
+            © 2026 {t.kisanMitra}. {t.allRightsReserved}
           </div>
           
           <div className="flex items-center gap-6 text-xs">

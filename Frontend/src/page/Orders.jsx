@@ -156,16 +156,17 @@ const OrdersPage = () => {
               )}
             </div>
 
-            {/* Side Information Card - Matching Summary Card Position */}
             <div className="lg:col-span-1">
               <div className="bg-white border border-slate-100 rounded-[2rem] p-6 sticky top-24 shadow-sm">
                 <h3 className="text-xl font-black text-slate-900 mb-4">{t.supportHeader || "Need Help?"}</h3>
                 <p className="text-slate-500 text-sm font-medium mb-6">
                   {t.supportText || "If you have any issues with your orders, our support team is available 24/7."}
                 </p>
-                <button className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-slate-200 mb-4">
+                <a href="/contact">
+                  <button className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-slate-200 mb-4">
                   {t.contactSupport || "Contact Support"}
                 </button>
+                </a>
                 <div className="space-y-3 opacity-60">
                    <div className="flex items-center gap-3 text-[10px] font-black text-slate-500 uppercase tracking-tighter">
                     <CheckCircle2 size={16} className="text-emerald-500" /> 100% Quality Assurance

@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true,      
     lowercase: true 
-},
+  },
   password: { 
     type: String, 
     required: true 
@@ -27,11 +27,10 @@ const userSchema = new mongoose.Schema({
   pincode: { 
     type: String 
   },
-
   farmName: { 
     type: String 
   },
-  farmLocation: { 
+  Location: { 
     type: String 
   },
   farmingType: { 
@@ -43,9 +42,20 @@ const userSchema = new mongoose.Schema({
   farmImageUrl: { 
     type: String 
   },
+  img:{
+    type: String, 
+  },
   isVerified: { 
     type: Boolean, 
     default: false 
+  },
+  about: {
+    type: String,
+    maxLength: [500, "Bio cannot exceed 500 characters"],
+  },
+  stars: {
+    type: Number,
+    default: 4.5,
   },
   createdAt: { 
     type: Date, 
