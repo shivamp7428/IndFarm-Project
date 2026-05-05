@@ -1,8 +1,14 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Leaf, ShoppingCart, Package, Search, MapPin, Menu, X, User, ChevronRight, ChevronDown, Home, ShoppingBag, Settings, LogOut, Info, LayoutDashboard, Globe,Bell,} from "lucide-react";
+import { 
+  Leaf, ShoppingCart, Package, Search, MapPin, Menu, X, User, 
+  ChevronRight, ChevronDown, Home, ShoppingBag, Settings, LogOut, 
+  Info, LayoutDashboard, Globe, Bell 
+} from "lucide-react";
 import { useTranslation } from "../context/LanguageContext";
+
+// --- Helper Components ---
 
 function CustomSelect() {
   const { translations: t } = useTranslation();
@@ -59,11 +65,8 @@ function SearchBar() {
 
   return (
     <div className="flex-1 max-w-3xl hidden md:flex items-center bg-slate-50 border border-emerald-100 rounded-2xl p-1 focus-within:ring-4 ring-emerald-500/10 focus-within:border-emerald-500 transition-all duration-300 mx-6">
-      
       <CustomSelect />
-
       <div className="h-5 w-px bg-emerald-100 mx-1" aria-hidden="true" />
-
       <input
         type="text"
         placeholder={t.search}
@@ -71,7 +74,6 @@ function SearchBar() {
         onChange={(e) => setSearchQuery(e.target.value)}
         className="flex-1 bg-transparent px-4 py-2 outline-none text-sm text-slate-700 font-medium"
       />
-
       <button
         onClick={() => setIsNearMe(!isNearMe)}
         className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all ${
@@ -81,7 +83,6 @@ function SearchBar() {
         <MapPin size={14} strokeWidth={2.5} />
         <span className="text-[11px] font-black uppercase tracking-tighter whitespace-nowrap">{t.nearMe}</span>
       </button>
-
       <button className="bg-slate-900 p-2.5 rounded-xl text-white ml-1 hover:bg-black/80 transition-all">
         <Search size={18} strokeWidth={2.5} />
       </button>
@@ -89,8 +90,7 @@ function SearchBar() {
   );
 }
 
-
-function AccountDropdown({ isLoggedIn, userName }) {
+function AccountDropdown({ isLoggedIn, userName, onLogout }) {
   const { lang, toggleLanguage, translations: t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -121,52 +121,57 @@ function AccountDropdown({ isLoggedIn, userName }) {
 
       {isOpen && (
         <div className="absolute top-[calc(100%+8px)] right-0 w-64 bg-white border border-slate-100 rounded-3xl shadow-2xl p-4 z-[110]">
-          {!isLoggedIn && (
-             <div className="text-center border-b border-slate-50 pb-4 mb-4">
-               <a href="/auth" className="block w-full">
-                 <button className="w-full bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-sm">{t.signin}</button>
-               </a>
-             </div>
+          {!isLoggedIn ? (
+            <div className="text-center border-b border-slate-50 pb-4 mb-4">
+              <a href="/auth" className="block w-full">
+                <button className="w-full bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-sm">{t.signin}</button>
+              </a>
+            </div>
+          ) : (
+            <div className="px-3 pb-2 mb-2 border-b border-slate-50">
+               <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Active Session</p>
+            </div>
           )}
-         <div className="space-y-1">
-  <button
-    onClick={toggleLanguage}
-    className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600"
-  >
-    <div className="flex items-center gap-3">
-      <Globe size={16} /> <span>{t.language}</span>
-    </div>
-    <span className="text-[10px] font-black text-emerald-600">
-      {lang === "en" ? "EN" : "HI"}
-    </span>
-  </button>
+          
+          <div className="space-y-1">
+            <button onClick={toggleLanguage} className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
+              <div className="flex items-center gap-3"><Globe size={16} /> <span>{t.language}</span></div>
+              <span className="text-[10px] font-black text-emerald-600">{lang === "en" ? "EN" : "HI"}</span>
+            </button>
 
-  {isLoggedIn && (
-    <a href="/dashboard" className="block">
-      <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
-        <LayoutDashboard size={16} /> {t.dashboard}
-      </button>
-    </a>
-  )}
+            {isLoggedIn && (
+              <>
+                <a href="/dashboard" className="block">
+                  <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
+                    <LayoutDashboard size={16} /> {t.dashboard}
+                  </button>
+                </a>
+                <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 rounded-xl text-sm font-bold text-red-600">
+                  <LogOut size={16} /> Logout
+                </button>
+              </>
+            )}
 
-  <a href="/orders" className="md:hidden block">
-    <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
-      <Package size={16} /> {t.orders}
-    </button>
-  </a>
-         </div>
+            <a href="/orders" className="md:hidden block">
+              <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
+                <Package size={16} /> {t.orders}
+              </button>
+            </a>
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-function MobileMenu({ isOpen, setIsOpen, userName, isLoggedIn }) {
+function MobileMenu({ isOpen, setIsOpen, userName, isLoggedIn, onLogout }) {
   const { lang, toggleLanguage, translations: t } = useTranslation();
+  
   const navItems = [
     { name: `${t.home}`, icon: Home, link: "/" },
     { name: `${t.shopcategories}`, icon: ShoppingBag, link: "/categories" },
     { name: `${t.myorders}`, icon: Package, link: "/orders" },
+    ...(isLoggedIn ? [{ name: "Dashboard", icon: LayoutDashboard, link: "/dashboard" }] : []),
     { name: `${t.settings}`, icon: Settings, link: "/settings" },
     { name: `${t.aboutkisanmitra}`, icon: Info, link: "/about" },
   ];
@@ -198,20 +203,53 @@ function MobileMenu({ isOpen, setIsOpen, userName, isLoggedIn }) {
               </button>
             </a>
           ))}
+          {isLoggedIn && (
+            <button onClick={onLogout} className="w-full flex items-center gap-4 px-8 py-4 hover:bg-red-50 text-red-600 mt-2">
+              <LogOut size={20} /> <span className="font-bold text-sm">Logout</span>
+            </button>
+          )}
         </nav>
       </div>
     </>
   );
 }
 
-export function Navbar({ cartCount = 0, isLoggedIn = false, userName = "Patel" }) {
+// --- Main Navbar Component ---
+
+export function Navbar({ cartCount = 0 }) {
   const { lang, toggleLanguage, translations: t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // States for Authentication
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
+
+  // Logic to detect user on load
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userStr = localStorage.getItem("user");
+    
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setIsLoggedIn(true);
+        setUserName(user.fullName || "User");
+      } catch (e) {
+        console.error("User data parse error");
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsLoggedIn(false);
+    window.location.href = "/";
+  };
 
   return (
     <>
       <nav className="sticky top-0 z-[100] w-full bg-white/90 backdrop-blur-xl border-b border-slate-100">
-        {/* max-w-full and px-2 to keep it touch-to-edge but with internal padding */}
         <div className="max-w-full mx-auto px-2 py-3 flex items-center justify-between">
           
           <button className="md:hidden p-2.5 bg-slate-100 rounded-xl text-slate-600" onClick={() => setMobileMenuOpen(true)}>
@@ -230,15 +268,12 @@ export function Navbar({ cartCount = 0, isLoggedIn = false, userName = "Patel" }
           <div className="flex items-center gap-1 sm:gap-4 mr-2">
             <a href="/notification">
               <button className="relative p-2 text-slate-400 hover:text-black/90 hover:bg-emerald-50 rounded-xl transition-all">
-              <Bell size={20} />
-              <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white"></span>
-            </button>
+                <Bell size={20} />
+                <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+              </button>
             </a>
 
-            <button
-              onClick={toggleLanguage}
-              className="hidden md:flex items-center gap-2 px-2 py-1.5 border border-slate-100 rounded-xl text-[10px] font-black text-slate-600 hover:bg-emerald-50 transition-all uppercase tracking-widest"
-            >
+            <button onClick={toggleLanguage} className="hidden md:flex items-center gap-2 px-2 py-1.5 border border-slate-100 rounded-xl text-[10px] font-black text-slate-600 hover:bg-emerald-50 transition-all uppercase tracking-widest">
               <Globe size={14} strokeWidth={2.5} />
               {lang === "en" ? "हिन्दी" : "ENG"}
             </button>
@@ -250,7 +285,7 @@ export function Navbar({ cartCount = 0, isLoggedIn = false, userName = "Patel" }
               </button>
             </a>
 
-            <AccountDropdown isLoggedIn={isLoggedIn} userName={userName} />
+            <AccountDropdown isLoggedIn={isLoggedIn} userName={userName} onLogout={handleLogout} />
 
             <a href="/cart" className="block ml-1">
               <button className="relative p-3 bg-slate-900 text-white hover:bg-black/80 rounded-2xl transition-all shadow-lg shadow-slate-200">
@@ -278,6 +313,7 @@ export function Navbar({ cartCount = 0, isLoggedIn = false, userName = "Patel" }
         setIsOpen={setMobileMenuOpen} 
         userName={userName} 
         isLoggedIn={isLoggedIn} 
+        onLogout={handleLogout}
       />
     </>
   );

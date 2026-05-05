@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
-  // --- Common Fields (both roles) ----
   fullName: { 
     type: String, 
     required: true 
@@ -22,8 +21,6 @@ const userSchema = new mongoose.Schema({
     enum: ['farmer', 'customer'], 
     required: true 
   },
-
-  // --- Customer Specific Fields---
   deliveryAddress: { 
     type: String,
   },
@@ -46,8 +43,6 @@ const userSchema = new mongoose.Schema({
   farmImageUrl: { 
     type: String 
   },
-
-  // --- Metadata ---
   isVerified: { 
     type: Boolean, 
     default: false 
