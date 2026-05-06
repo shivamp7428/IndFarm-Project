@@ -49,6 +49,13 @@ const userSchema = new mongoose.Schema({
     type: Boolean, 
     default: false 
   },
+  otp: {
+  type: String,
+},
+
+otpExpiry: {
+  type: Date,
+},
   about: {
     type: String,
     maxLength: [500, "Bio cannot exceed 500 characters"],

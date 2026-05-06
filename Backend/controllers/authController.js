@@ -1,6 +1,19 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
+import dotenv from "dotenv";
+dotenv.config();
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true, 
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS   
+  }
+});
 
 export const signup = async (req, res) => {
   try {
@@ -40,7 +53,7 @@ export const signup = async (req, res) => {
   }
 };
 
-// --- LOGIN LOGIC ---
+
 export const login = async (req, res) => {
   try {
     const { identifier, password } = req.body;
@@ -55,20 +68,34 @@ export const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role }, 
-      process.env.JWT_SECRET || 'secret_key', 
-      { expiresIn: '7d' }
-    );
+    // --- OTP LOGIC STARTS HERE ---
+    
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-   return res.status(200).json({
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 5 * 60 * 1000;
+    await user.save();
+
+    console.log("Sending mail to:", user.identifier);
+    try {
+        await transporter.sendMail({
+            to: user.identifier, 
+            subject: "Login Verification OTP",
+            text: `Your OTP Code: ${otp}. It will expire in 5 minutes.`
+        });
+    } catch (mailError) {
+        console.log("MAIL ERROR DETAILS:", mailError);
+        return res.status(500).json({ message: "Error sending OTP email" });
+    }
+
+    return res.status(200).json({
       success: true,
-      token,
-      user: { id: user._id, fullName: user.fullName, role: user.role }
+      message: "OTP sent to your email",
+      otpRequired: true 
     });
 
   } catch (error) {
-   return res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -77,7 +104,7 @@ export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password"); 
     if (!user) {
-      return res.status(404).json({ success: false, message: "User nahi mila" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
     return res.status(200).json({
       success: true,
@@ -139,5 +166,75 @@ export const deleteAccount = async (req, res) => {
     return res.status(200).json({ success: true, message: "Account deleted successfully" });
   } catch (error) {
     return res.status(500).json({ message: "Delete failed" });
+  }
+};
+
+// OTP Send logic
+export const sendOTP = async (req, res) => {
+  try {
+    const { identifier } = req.body; 
+
+    const user = await User.findOne({ identifier });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 5 * 60 * 1000;
+    await user.save();
+
+    await transporter.sendMail({
+      to: identifier, 
+      subject: "Your OTP Code",
+      text: `Your OTP is ${otp}. It will expire in 5 minutes.`,
+    });
+
+    res.json({ message: "OTP sent successfully" });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Verify OTP logic
+export const verifyOTP = async (req, res) => {
+  try {
+    const { identifier, otp } = req.body;
+
+    const user = await User.findOne({ identifier });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // 1. Expiry check
+    if (!user.otp || user.otpExpiry < Date.now()) {
+      return res.status(400).json({ message: "OTP expired or not requested" });
+    }
+
+    // 2. Match check
+    if (user.otp !== otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    // 3. Success! OTP clear
+    user.otp = null;
+    user.otpExpiry = null;
+    await user.save();
+
+    const token = jwt.sign(
+      { id: user._id, role: user.role }, 
+      process.env.JWT_SECRET || 'secret_key', 
+      { expiresIn: '7d' }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token,
+      user: { id: user._id, fullName: user.fullName, role: user.role }
+    });
+
+  } catch (error) {
+    return res.status(500).json({ message: "Verification failed" });
   }
 };
