@@ -1,10 +1,12 @@
 import express from "express";
-const router = express.Router();
-import { createBlog, getAllBlogs, getBlogsByFarmer } from "../controllers/blogController.js";
+import { createBlog, deleteBlog, getAllBlogs, getBlogsByFarmer } from "../controllers/blogController.js";
 import { isFarmer, protect } from './../middlewares/authMiddleware.js';
+import { upload } from "../config/cloudinary.js";
 
-router.post("/", protect, isFarmer, createBlog);
+const router = express.Router();
+
+router.post("/add", protect, isFarmer, upload.single("blogImage"), createBlog);
 router.get("/", getAllBlogs);
 router.get("/farmer/:id", getBlogsByFarmer);
-
+router.delete("/:id", protect, isFarmer, deleteBlog);
 export default router;

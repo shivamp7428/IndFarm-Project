@@ -1,10 +1,8 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
-  fullName: { 
-    type: String, 
-    required: true 
-  },
+  fullName: { type: String, required: true },
+
   identifier: { 
     type: String, 
     required: true, 
@@ -12,58 +10,81 @@ const userSchema = new mongoose.Schema({
     trim: true,      
     lowercase: true 
   },
-  password: { 
-    type: String, 
-    required: true 
-  },
+
+  password: { type: String, required: true },
+
   role: { 
     type: String, 
     enum: ['farmer', 'customer'], 
     required: true 
   },
+
   deliveryAddress: { 
     type: String,
+    default: ""  
   },
+
   pincode: { 
-    type: String 
+    type: String,
+    default: ""   
   },
+
   farmName: { 
-    type: String 
+    type: String,
+    default: ""   
   },
-  Location: { 
-    type: String 
+
+  farmLocation: {  
+    type: String,
+    default: ""
   },
+
   farmingType: { 
-    type: String 
+    type: String,
+    default: ""
   },
+
   products: [{ 
-    type: String 
+    type: String,
+    default: []   
   }],
-  farmImageUrl: { 
-    type: String 
+
+  farmImageUrl:{ 
+    type: String,
+    default: ""
   },
+
   img:{
     type: String, 
+    default: ""
   },
+
   isVerified: { 
     type: Boolean, 
     default: false 
   },
-  otp: {
-  type: String,
-},
 
-otpExpiry: {
-  type: Date,
-},
+  otp: {
+    type: String,
+    default: ""
+  },
+
+  otpExpiry: {
+    type: Date,
+    default: null
+  },
+
   about: {
     type: String,
-    maxLength: [500, "Bio cannot exceed 500 characters"],
+    default: "",
+    maxLength: 500,
   },
+
   stars: {
     type: Number,
     default: 4.5,
   },
+
   createdAt: { 
     type: Date, 
     default: Date.now 

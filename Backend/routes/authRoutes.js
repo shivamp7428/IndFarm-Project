@@ -11,7 +11,7 @@ UserRouter.post('/send-otp', sendOTP);
 UserRouter.post('/verify-otp', verifyOTP);
 
 UserRouter.get('/me',auth, getProfile);
-UserRouter.put('/update',auth, upload.single('farmImage'), updateProfile);
+UserRouter.put('/update',auth,upload.fields([{ name: "farmImage", maxCount: 1 },{ name: "profileImage", maxCount: 1 }]),updateProfile);
 UserRouter.put('/change-password',auth, changePassword);
 UserRouter.delete('/delete',auth, deleteAccount);
 

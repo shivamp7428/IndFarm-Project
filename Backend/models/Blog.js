@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const blogSchema = new mongoose.Schema({
   farmerId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'farmer',
     required: true
   },
   title: {

@@ -31,8 +31,30 @@ export const signup = async (req, res) => {
       farmImageUrl = req.file.path; 
     }
 
-    const newUser = new User({ fullName, identifier, password: hashedPassword, role, farmName, farmLocation, farmingType, products: products ? JSON.parse(products) : [],  deliveryAddress,  pincode,farmImageUrl });
+    const newUser = new User({
+  fullName,
+  identifier,
+  password: hashedPassword,
+  role,
 
+  deliveryAddress: deliveryAddress || "",
+  pincode: pincode || "",
+
+  farmName: farmName || "",
+  farmLocation: farmLocation || "",
+
+  farmingType: farmingType || "",
+
+  products: Array.isArray(products)
+    ? products
+    : products
+    ? products.split(",")
+    : [],
+
+  farmImageUrl: farmImageUrl || "",
+
+  isVerified: false   
+});
     await newUser.save();
 
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -57,115 +79,58 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { identifier, password } = req.body;
-    
-    if(!identifier || !password) {
-        return res.status(400).json({ message: "Identifier and password required" });
+
+    if (!identifier || !password) {
+      return res.status(400).json({ message: "Email and password required" });
     }
 
     const user = await User.findOne({ identifier });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    if (!user) return res.status(400).json({ message: "This Email Not Exist" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch) return res.status(400).json({ message: "Please Check You Email Or Password" });
 
-    // --- OTP LOGIC STARTS HERE ---
-    
+    if (user.isVerified) {
+      const token = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Login successful",
+        token,
+        user: {
+          id: user._id,
+          fullName: user.fullName,
+          role: user.role
+        }
+      });
+    }
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     user.otp = otp;
     user.otpExpiry = Date.now() + 5 * 60 * 1000;
+
     await user.save();
 
-    console.log("Sending mail to:", user.identifier);
-    try {
-        await transporter.sendMail({
-            to: user.identifier, 
-            subject: "Login Verification OTP",
-            text: `Your OTP Code: ${otp}. It will expire in 5 minutes.`
-        });
-    } catch (mailError) {
-        console.log("MAIL ERROR DETAILS:", mailError);
-        return res.status(500).json({ message: "Error sending OTP email" });
-    }
+    await transporter.sendMail({
+      to: user.identifier,
+      subject: "Verify Your Account",
+      text: `Your OTP is ${otp}`
+    });
 
     return res.status(200).json({
       success: true,
-      message: "OTP sent to your email",
-      otpRequired: true 
+      message: "OTP sent. Please verify your account",
+      otpRequired: true
     });
 
   } catch (error) {
+      console.log("LOGIN ERROR:", error); 
     return res.status(500).json({ message: "Server Error" });
-  }
-};
-
-//Get profile
-export const getProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select("-password"); 
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
-    return res.status(200).json({
-      success: true,
-      user: user
-    });
-  } catch (error) {
-    return res.status(500).json({ 
-      success: false, 
-      message: "Server error", 
-      error: error.message 
-    });
-  }
-};
-
-//  UPDATE PROFILE ---
-export const updateProfile = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const updates = req.body;
-
-    delete updates.password; 
-    delete updates.role;
-
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      { $set: updates }, 
-      { new: true, runValidators: true }
-    ).select("-password");
-
-   return res.status(200).json({ success: true, user: updatedUser });
-  } catch (error) {
-   return res.status(500).json({ message: "Update failed", error: error.message });
-  }
-};
-
-// CHANGE PASSWORD ---
-export const changePassword = async (req, res) => {
-  try {
-    const { oldPassword, newPassword } = req.body;
-    const user = await User.findById(req.user.id);
-
-    const isMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Old password is incorrect" });
-
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
-    
-    await user.save();
-    return res.status(200).json({ success: true, message: "Password changed successfully" });
-  } catch (error) {
-    return res.status(500).json({ message: "Error changing password" });
-  }
-};
-
-//  DELETE ACCOUNT ---
-export const deleteAccount = async (req, res) => {
-  try {
-    await User.findByIdAndDelete(req.user.id);
-    return res.status(200).json({ success: true, message: "Account deleted successfully" });
-  } catch (error) {
-    return res.status(500).json({ message: "Delete failed" });
   }
 };
 
@@ -198,7 +163,6 @@ export const sendOTP = async (req, res) => {
   }
 };
 
-// Verify OTP logic
 export const verifyOTP = async (req, res) => {
   try {
     const { identifier, otp } = req.body;
@@ -206,35 +170,167 @@ export const verifyOTP = async (req, res) => {
     const user = await User.findOne({ identifier });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // 1. Expiry check
     if (!user.otp || user.otpExpiry < Date.now()) {
-      return res.status(400).json({ message: "OTP expired or not requested" });
+      return res.status(400).json({ message: "OTP expired" });
     }
 
-    // 2. Match check
     if (user.otp !== otp) {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
-    // 3. Success! OTP clear
+    // 🔥 MAIN CHANGE
+    user.isVerified = true;
+
     user.otp = null;
     user.otpExpiry = null;
+
     await user.save();
 
     const token = jwt.sign(
-      { id: user._id, role: user.role }, 
-      process.env.JWT_SECRET || 'secret_key', 
-      { expiresIn: '7d' }
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
     );
 
     return res.status(200).json({
       success: true,
       message: "Login successful",
       token,
-      user: { id: user._id, fullName: user.fullName, role: user.role }
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        role: user.role
+      }
     });
 
   } catch (error) {
     return res.status(500).json({ message: "Verification failed" });
+  }
+};
+
+//Get profile
+export const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password"); 
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    return res.status(200).json({
+      success: true,
+      user: user
+    });
+  } catch (error) {
+    return res.status(500).json({ 
+      success: false, 
+      message: "Server error", 
+      error: error.message 
+    });
+  }
+};
+
+//  UPDATE PROFILE 
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    let updates = { ...req.body };
+
+    delete updates.password;
+    delete updates.role;
+    delete updates.isVerified;
+    delete updates.stars;
+    delete updates.otp;
+    delete updates.otpExpiry;
+
+    const allowedFields = [
+      "fullName",
+      "farmName",
+      "farmLocation",
+      "farmingType",
+      "products",
+      "deliveryAddress",
+      "pincode",
+      "about"
+    ];
+
+    Object.keys(updates).forEach(key => {
+      if (!allowedFields.includes(key)) {
+        delete updates[key];
+      }
+    });
+
+    Object.keys(updates).forEach(key => {
+      if (updates[key] === "" || updates[key] === null) {
+        delete updates[key];
+      }
+    });
+
+    if (updates.products) {
+      try {
+        updates.products = JSON.parse(updates.products);
+      } catch {
+        updates.products = updates.products.split(",");
+      }
+    }
+
+   if (req.files?.farmImage) {
+    updates.farmImageUrl = req.files.farmImage[0].path;
+   }
+
+   if (req.files?.profileImage) {
+    updates.img = req.files.profileImage[0].path;
+   }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updates },
+      {
+        new: true,
+        runValidators: true
+      }
+    ).select("-password");
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: updatedUser
+    });
+
+  } catch (error) {
+    console.error("UPDATE ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Update failed",
+      error: error.message
+    });
+  }
+};
+
+// CHANGE PASSWORD ---
+export const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const user = await User.findById(req.user.id);
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Old password is incorrect" });
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    
+    await user.save();
+    return res.status(200).json({ success: true, message: "Password changed successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error changing password" });
+  }
+};
+
+//  DELETE ACCOUNT ---
+export const deleteAccount = async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.user.id);
+    return res.status(200).json({ success: true, message: "Account deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "Delete failed" });
   }
 };

@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const productSchema = new mongoose.Schema({
   farmerId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'farmer',
     required: true
   },
   name: {
@@ -28,7 +28,7 @@ const productSchema = new mongoose.Schema({
     required: true
   },
   productImageUrl: {
-    type: String, // Single image for now
+    type: String, 
     required: true
   },
   stock: {

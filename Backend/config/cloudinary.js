@@ -15,7 +15,8 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'KisanMitra_Profiles',
-    allowed_formats: ['jpg', 'png', 'jpeg'],
+     allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif', 'bmp', 'tiff'],
+     format: "jpg" 
   },
 });
 

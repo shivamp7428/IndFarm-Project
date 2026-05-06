@@ -192,7 +192,7 @@ function MobileMenu({ isOpen, setIsOpen, userName, isLoggedIn, user, onLogout })
     { name: t.shopcategories, icon: ShoppingBag, link: "/categories" },
     { name: t.myorders, icon: Package, link: "/orders" },
     ...(isLoggedIn && userId ? [{
-      name: user.role === "farmer" ? t.farmerDashboard : t.userDashboard,
+      name: user.role === "farmer" ? t.dashboard : t.dashboard,
       icon: LayoutDashboard,
       link: user.role === "farmer" ? `/farmer-dashboard/${userId}` : `/user-dashboard/${userId}`
     }] : []),
@@ -309,7 +309,7 @@ export function Navbar({ cartCount = 0 }) {
 
   return (
     <>
-      <nav className="sticky top-0 z-[100] w-full bg-white/90 backdrop-blur-xl border-b border-slate-100">
+      <nav className="sticky top-0 z-[50] w-full bg-white/90 backdrop-blur-xl border-b border-slate-100">
         <div className="max-w-full mx-auto px-2 py-3 flex items-center justify-between">
           
           <button className="md:hidden p-2.5 bg-slate-100 rounded-xl text-slate-600" onClick={() => setMobileMenuOpen(true)}>
