@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { ShoppingCart, Heart, Minus, Plus, ChevronLeft } from "lucide-react";
 import { useTranslation } from "../context/LanguageContext";
+import { jwtDecode } from "jwt-decode";
 
 export default function Detail() {
   const { id } = useParams();
@@ -42,6 +43,23 @@ export default function Detail() {
     setQty(1);
   }, [product]);
 
+
+  // token decode
+const token = localStorage.getItem("token");
+
+let loggedInUserId = null;
+
+if (token) {
+  try {
+    const decoded = jwtDecode(token);
+
+    loggedInUserId = decoded.id || decoded._id;
+  } catch (error) {
+    console.log("Invalid token");
+  }
+}
+
+
   if (!product) {
   return (
     <section className="max-w-[1500px] mx-auto px-4 py-10">
@@ -72,6 +90,9 @@ export default function Detail() {
   const farmer = product.farmerId;
   const farmerImage = farmer?.img || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
+  //for self farmer
+  const isOwnProfile = loggedInUserId === farmer?._id;
+
   return (
     <section className="max-w-[1500px] mx-auto px-4 py-10 bg-gray-50">
       <button onClick={() => navigate(-1)} className="group cursor-pointer flex items-center gap-1 mb-8 ml-2 text-gray-500 hover:text-emerald-600 transition-all duration-200">
@@ -90,17 +111,29 @@ export default function Detail() {
         </div>
 
         <div className="flex flex-col">
-          <Link to={`/farmerProfile/${farmer?._id}`} className="inline-block">
-           <div className="flex items-center gap-3 mb-6 p-2 hover:bg-gray-50 rounded-xl transition-all cursor-pointer group">
-            <img src={farmerImage} className="w-12 h-12 rounded-full border border-gray-200 object-cover" alt="farmer" />
-             <div>
-              <h3 className="font-bold text-gray-900 border-b-2 border-transparent group-hover:border-emerald-600 inline-block transition-all">
-             {farmer?.fullName}
-             </h3>
-            <p className="text-sm text-gray-500">{farmer?.farmName}</p>
-           </div>
-          </div>
-          </Link>
+          <Link to={  isOwnProfile ? `/farmer-dashboard/${farmer?._id}` : `/farmerProfile/${farmer?._id}`}
+          className="inline-block"
+          >
+            <div className="flex items-center gap-3 mb-6 p-2 hover:bg-gray-50 rounded-xl transition-all cursor-pointer group">
+    
+    <img
+      src={farmerImage}
+      className="w-12 h-12 rounded-full border border-gray-200 object-cover"
+      alt="farmer"
+    />
+
+    <div>
+      <h3 className="font-bold text-gray-900 border-b-2 border-transparent group-hover:border-emerald-600 inline-block transition-all">
+        {farmer?.fullName}
+      </h3>
+
+      <p className="text-sm text-gray-500">
+        {farmer?.farmName}
+      </p>
+    </div>
+
+  </div>
+</Link>
           <h1 className="text-4xl font-extrabold text-gray-900 leading-tight">{product.name}</h1>
           <p className="text-gray-600 mt-4 text-lg leading-relaxed">{product.description}</p>
 
