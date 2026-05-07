@@ -5,7 +5,8 @@ import axios from "axios";
 import { 
   MapPin, Star, Users, Package, 
   BookOpen, ShoppingBasket, 
-  Edit3, Plus, Save, Trash2, Camera, Loader2
+  Edit3, Plus, Save, Trash2, Camera, Loader2,
+  X
 } from "lucide-react";
 import { useTranslation } from "../context/LanguageContext";
 import { ToastContainer, toast } from 'react-toastify';
@@ -150,7 +151,11 @@ const userRole = user.role;
            Authorization: `Bearer ${localStorage.getItem("token")}`
         }
       });
-
+     // Update localStorage name
+       const user = JSON.parse(localStorage.getItem("user"));
+       user.fullName = editForm.fullName;
+      localStorage.setItem("user", JSON.stringify(user));
+      
       toast.success("Profile Updated Successfully!");
       setIsEditingProfile(false);
       fetchFarmerData();        
@@ -162,7 +167,7 @@ const userRole = user.role;
     }
   };
 
-  // ===================== ADD PRODUCT =====================
+  // ADD PRODUCT
   const handleAddProduct = async (e) => {
     e.preventDefault();
     if (!productForm.name || !productForm.price) return alert("Name and Price are required");
@@ -637,66 +642,69 @@ const handleDeleteBlog = async (id) => {
   </div>
 )}
 
-{/* Product Detail Modal - For Farmer Dashboard */}
+{/* Product Detail Modal  */}
 {selectedProduct && (
-  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[95vh] overflow-hidden flex flex-col">
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto backdrop-blur-sm">
+    <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[95vh] overflow-hidden flex flex-col my-auto shadow-2xl relative">
       
-      {/* Image Section */}
-      <div className="relative">
-        <img 
-          src={selectedProduct.productImageUrl || "https://via.placeholder.com/600x400?text=No+Image"} 
-          alt={selectedProduct.name} 
-          className="w-full h-80 object-cover rounded-t-3xl" 
-        />
-        <button 
-          onClick={closeProductDetail}
-          className="absolute top-4 right-4 bg-white/90 hover:bg-white p-3 rounded-full text-2xl shadow-md transition-all"
-        >
-          ✕
-        </button>
-      </div>
+      <button 
+        onClick={() => setSelectedProduct(null)}
+        className="absolute top-4 right-4 bg-white/90 hover:bg-white p-3 rounded-full text-gray-800 shadow-md transition-all hover:rotate-90 z-[60]"
+      >
+        <X size={24} />
+      </button>
 
-      <div className="flex-1 overflow-auto p-8 space-y-6">
+      <div className="flex-1 overflow-y-auto">
         
-        {/* Title & Price */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{selectedProduct.name}</h1>
-          <p className="text-emerald-600 text-3xl font-bold mt-2">
-            ₹{selectedProduct.price} 
-            <span className="text-xl font-normal text-gray-500">/{selectedProduct.unit}</span>
-          </p>
+        <div className="relative h-full w-full bg-gray-100">
+          <img 
+            src={selectedProduct.productImageUrl || "https://via.placeholder.com/600x400?text=No+Image"} 
+            alt={selectedProduct.name} 
+            className="w-full h-full object-cover" 
+          />
         </div>
 
-        {/* Info Grid */}
-        <div className="grid grid-cols-2 gap-6 text-sm">
+        {/* Content Section */}
+        <div className="p-8 space-y-6">
           <div>
-            <p className="text-gray-500">Category</p>
-            <p className="font-semibold text-gray-800">{selectedProduct.category || "Not Specified"}</p>
-          </div>
-          <div>
-            <p className="text-gray-500">Stock Available</p>
-            <p className="font-semibold text-gray-800">{selectedProduct.stock} {selectedProduct.unit}</p>
-          </div>
-          <div>
-            <p className="text-gray-500">Status</p>
-            <p className={`font-semibold ${selectedProduct.isAvailable ? 'text-green-600' : 'text-red-600'}`}>
-              {selectedProduct.isAvailable ? "● Available" : "● Out of Stock"}
+            <h1 className="text-3xl font-bold text-gray-900">{selectedProduct.name}</h1>
+            <p className="text-emerald-600 text-3xl font-bold mt-2">
+              ₹{selectedProduct.price} 
+              <span className="text-xl font-normal text-gray-500">/{selectedProduct.unit}</span>
             </p>
           </div>
-        </div>
 
-        {/* Description */}
-        <div>
-          <p className="text-gray-500 mb-2 font-medium">Description</p>
-          <p className="text-gray-700 leading-relaxed text-[16.5px]">
-            {selectedProduct.description || "No description provided for this product."}
-          </p>
-        </div>
+          {/* Info Grid */}
+          <div className="grid grid-cols-2 gap-6 text-sm">
+            <div>
+              <p className="text-gray-500">Category</p>
+              <p className="font-semibold text-gray-800">{selectedProduct.category || "Not Specified"}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Stock Available</p>
+              <p className="font-semibold text-gray-800">{selectedProduct.stock} {selectedProduct.unit}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Status</p>
+              <p className={`font-semibold ${selectedProduct.isAvailable ? 'text-green-600' : 'text-red-600'}`}>
+                {selectedProduct.isAvailable ? "● Available" : "● Out of Stock"}
+              </p>
+            </div>
+          </div>
 
+          {/* Description */}
+          <div>
+            <p className="text-gray-500 mb-2 font-medium">Description</p>
+            <p className="text-gray-700 leading-relaxed text-[16.5px] whitespace-pre-line">
+              {selectedProduct.description || "No description provided for this product."}
+            </p>
+          </div>
+          
+          <div className="h-4"></div>
+        </div>
       </div>
 
-      {/* Bottom Action Buttons - Farmer Only */}
+      {/* FIXED BOTTOM ACTION BUTTONS */}
       <div className="p-6 border-t bg-gray-50 rounded-b-3xl">
         <div className="flex gap-4">
           <button 
@@ -721,7 +729,6 @@ const handleDeleteBlog = async (id) => {
     </div>
   </div>
 )}
-
 {/* Edit Product Modal */}
 {isEditingProduct && editingProduct && (
   <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
@@ -850,7 +857,7 @@ const handleDeleteBlog = async (id) => {
   </div>
 )}
 
-    {activeTab === "blog" && (
+  {activeTab === "blog" && (
   <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
     {blogs.length === 0 ? (
       <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-400 border-2 border-dashed rounded-[3rem]">
@@ -913,37 +920,55 @@ const handleDeleteBlog = async (id) => {
     )}
   </div>
   )}
-{/* Blog Detail Modal */}
 {selectedBlog && (
-  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-3xl max-w-xl  max-h-[90vh] overflow-auto">
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-sm animate-in fade-in duration-300">
+    <div className="bg-white rounded-[2.5rem] max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative">
       
-      {/* Image */}
-      {selectedBlog.blogImageUrl && (
-        <img 
-          src={selectedBlog.blogImageUrl} 
-          className="w-full h-80 object-cover rounded-t-3xl" 
-          alt={selectedBlog.title} 
-        />
-      )}
+      <button 
+        onClick={closeBlogDetail}
+        className="absolute top-5 right-5 z-[60] bg-white/90 hover:bg-white p-3 rounded-full text-gray-900 shadow-xl border border-gray-100 transition-all hover:rotate-90 active:scale-90"
+      >
+        <X size={24} strokeWidth={2.5} />
+      </button>
 
-      <div className="p-8">
-        <button 
-          onClick={closeBlogDetail}
-          className="float-right text-2xl text-gray-400 hover:text-black mb-4"
-        >
-          ✕
-        </button>
-        
-        <h1 className="text-3xl font-bold mb-6 pr-12">{selectedBlog.title}</h1>
-        
-        <div className="text-gray-700 leading-relaxed text-[17px] whitespace-pre-line">
-          {selectedBlog.content}
+      <div className="overflow-y-auto">
+        {selectedBlog.blogImageUrl && (
+          <div className="relative h-64 md:h-80 w-full flex-shrink-0">
+            <img 
+              src={selectedBlog.blogImageUrl} 
+              className="w-full h-full object-cover" 
+              alt={selectedBlog.title} 
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent" />
+          </div>
+        )}
+
+         <div className="p-8 md:p-12">
+          {/* Date Tag */}
+          <div className="flex items-center gap-2 mb-5">
+            <span className="bg-emerald-100 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">
+              {new Date(selectedBlog.createdAt).toLocaleDateString(undefined, { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </span>
+          </div>
+
+          <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-8 leading-tight pr-10">
+            {selectedBlog.title}
+          </h1>
+          <div className="text-gray-700 leading-relaxed text-[18px] whitespace-pre-line prose prose-emerald max-w-none">
+            {selectedBlog.content}
+          </div>
         </div>
       </div>
+
+      <div className="h-6 bg-white w-full flex-shrink-0" />
     </div>
   </div>
 )}
+
         {activeTab === "reviews" && (
           <div className="py-20 text-center text-gray-400">
             <Star size={64} className="mx-auto mb-4 opacity-20 text-emerald-600" />
@@ -952,89 +977,214 @@ const handleDeleteBlog = async (id) => {
         )}
       </div>
 
-  
-      {/* Add Product Modal */}
-      {showAddProduct && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-8">
-            <h2 className="text-2xl font-bold mb-6">Add New Product</h2>
-            <form onSubmit={handleAddProduct} className="space-y-5">
-              {/* Same fields as before */}
-              <input type="text" name="name" placeholder="Product Name" value={productForm.name} onChange={handleProductChange} className="w-full p-4 border rounded-2xl" required />
-              <div className="grid grid-cols-2 gap-4">
-                <input type="number" name="price" placeholder="Price" value={productForm.price} onChange={handleProductChange} className="w-full p-4 border rounded-2xl" required />
-                <input type="text" name="unit" placeholder="Unit" value={productForm.unit} onChange={handleProductChange} className="w-full p-4 border rounded-2xl" />
-              </div>
-              <input type="text" name="category" placeholder="Category" value={productForm.category} onChange={handleProductChange} className="w-full p-4 border rounded-2xl" />
-              <input type="number" name="stock" placeholder="Stock" value={productForm.stock} onChange={handleProductChange} className="w-full p-4 border rounded-2xl" />
-              <textarea name="description" placeholder="Description" value={productForm.description} onChange={handleProductChange} className="w-full p-4 border rounded-2xl h-24" />
+  {/* Add Product Modal */}
+{showAddProduct && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 md:p-6 overflow-y-auto backdrop-blur-sm">
+    
+    <div className="bg-white rounded-[2.5rem] max-w-lg w-full shadow-2xl relative flex flex-col my-auto max-h-[95vh]">
+      
+      {/* Fixed Header */}
+      <div className="p-8 pb-4 flex justify-between items-center border-b border-gray-50">
+        <h2 className="text-2xl font-bold text-gray-900">Add New Product</h2>
+        <button 
+          onClick={() => {setShowAddProduct(false); resetProductForm();}}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <X size={24} className="text-gray-500" />
+        </button>
+      </div>
 
-              <label className="block border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer">
-                {previewProductImage ? <img src={previewProductImage} className="mx-auto max-h-40" /> : <p>Upload Image</p>}
-                <input type="file" accept="image/*" onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    setProductForm(p => ({...p, productImage: file}));
-                    setPreviewProductImage(URL.createObjectURL(file));
-                  }
-                }} className="hidden" />
-              </label>
+      {/* Scrollable Form Body */}
+      <div className="p-8 pt-6 overflow-y-auto custom-scrollbar">
+        <form onSubmit={handleAddProduct} className="space-y-5">
+          
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-gray-600 ml-1">Product Name</label>
+            <input type="text" name="name" placeholder="Enter product name" value={productForm.name} onChange={handleProductChange} className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all" required />
+          </div>
 
-              <div className="flex gap-4">
-                <button type="button" onClick={() => {setShowAddProduct(false); resetProductForm();}} className="flex-1 py-4 border rounded-2xl">Cancel</button>
-                <button type="submit" disabled={submitting} className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-700  disabled:bg-emerald-500 text-white rounded-2xl font-semibold text-lg transition-all duration-200  flex items-center justify-center gap-3 shadow-lg disabled:shadow-none active:scale-[0.98]">
-                {submitting ? (
-                 <>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-gray-600 ml-1">Price (₹)</label>
+              <input type="number" name="price" placeholder="0.00" value={productForm.price} onChange={handleProductChange} className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all" required />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-gray-600 ml-1">Unit (e.g. kg)</label>
+              <input type="text" name="unit" placeholder="kg/pc" value={productForm.unit} onChange={handleProductChange} className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-gray-600 ml-1">Category</label>
+              <input type="text" name="category" placeholder="Vegetables" value={productForm.category} onChange={handleProductChange} className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-gray-600 ml-1">Stock</label>
+              <input type="number" name="stock" placeholder="100" value={productForm.stock} onChange={handleProductChange} className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all" />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-gray-600 ml-1">Description</label>
+            <textarea name="description" placeholder="Tell us about your product..." value={productForm.description} onChange={handleProductChange} className="w-full p-4 border border-gray-200 rounded-2xl h-28 resize-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all" />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-gray-600 ml-1">Product Image</label>
+            <label className="block border-2 border-dashed border-gray-200 hover:border-emerald-500 rounded-2xl p-6 text-center cursor-pointer bg-gray-50/50 hover:bg-emerald-50/30 transition-all">
+              {previewProductImage ? (
+                <div className="relative group">
+                  <img src={previewProductImage} className="mx-auto max-h-48 rounded-xl shadow-md" alt="Preview" />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 rounded-xl transition-all">
+                    <p className="text-white text-sm font-medium">Change Photo</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto text-gray-400">
+                    <Package size={24} />
+                  </div>
+                  <p className="text-gray-500 font-medium">Click to upload image</p>
+                  <p className="text-xs text-gray-400">PNG, JPG up to 5MB</p>
+                </div>
+              )}
+              <input type="file" accept="image/*" onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  setProductForm(p => ({...p, productImage: file}));
+                  setPreviewProductImage(URL.createObjectURL(file));
+                }
+              }} className="hidden" />
+            </label>
+          </div>
+
+          <div className="flex gap-4 pt-4 sticky bottom-0 bg-white pb-2">
+            <button type="button" onClick={() => {setShowAddProduct(false); resetProductForm();}} className="flex-1 py-4 border border-gray-200 text-gray-600 rounded-2xl font-semibold hover:bg-gray-50 transition-all active:scale-[0.98]">Cancel</button>
+            <button type="submit" disabled={submitting} className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-500 text-white rounded-2xl font-bold text-lg transition-all shadow-lg shadow-emerald-100 flex items-center justify-center gap-3 active:scale-[0.98]">
+              {submitting ? (
+                <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Processing...</span>
+                  <span>Saving...</span>
                 </>
-               ) : (
-                 "Add Product"
-                  )}
-                </button>
-              </div>
-            </form>
+              ) : (
+                "Add Product"
+              )}
+            </button>
           </div>
-        </div>
-      )}
+        </form>
+      </div>
+    </div>
+  </div>
+)}
+      {/* Add Blog Modal - */}
+{showAddBlog && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 md:p-6 overflow-y-auto backdrop-blur-sm">
+    
+    <div className="bg-white rounded-[2.5rem] max-w-lg w-full shadow-2xl relative flex flex-col my-auto max-h-[95vh]">
+      
+      {/* Fixed Header */}
+      <div className="p-8 pb-4 flex justify-between items-center border-b border-gray-50">
+        <h2 className="text-2xl font-bold text-gray-900">Create Blog Post</h2>
+        <button 
+          onClick={() => {setShowAddBlog(false); resetBlogForm();}}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <X size={24} className="text-gray-500" />
+        </button>
+      </div>
 
-      {/* Add Blog Modal - Similar structure */}
-      {showAddBlog && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-8">
-            <h2 className="text-2xl font-bold mb-6">Create Blog Post</h2>
-            <form onSubmit={handleAddBlog} className="space-y-5">
-              <input type="text" name="title" placeholder="Title" value={blogForm.title} onChange={handleBlogChange} className="w-full p-4 border rounded-2xl" required />
-              <textarea name="content" placeholder="Content" value={blogForm.content} onChange={handleBlogChange} className="w-full p-4 border rounded-2xl h-48" required />
-
-              <label className="block border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer">
-                {previewBlogImage ? <img src={previewBlogImage} className="mx-auto max-h-40" /> : <p>Upload Blog Image</p>}
-                <input type="file" accept="image/*" onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    setBlogForm(b => ({...b, blogImage: file}));
-                    setPreviewBlogImage(URL.createObjectURL(file));
-                  }
-                }} className="hidden" />
-              </label>
-
-              <div className="flex gap-4">
-                <button type="button" onClick={() => {setShowAddBlog(false); resetBlogForm();}} className="flex-1 py-4 border rounded-2xl">Cancel</button>
-                <button type="submit" disabled={submitting}  className="flex-1 py-4 bg-black text-white rounded-2xl  font-semibold text-lg transition-all duration-200  flex items-center justify-center gap-3  disabled:cursor-not-allowed active:scale-[0.97]">
-                 {submitting ? (
-                           <>
-                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Processing...
-                          </>
-                        ) : (
-                          "Publish"
-                          )}
-                 </button>
-              </div>
-            </form>
+      {/* Scrollable Form Body */}
+      <div className="p-8 pt-6 overflow-y-auto custom-scrollbar">
+        <form onSubmit={handleAddBlog} className="space-y-6">
+          
+          {/* Title Field */}
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-gray-600 ml-1">Blog Title</label>
+            <input 
+              type="text" 
+              name="title" 
+              placeholder="Give your blog a catchy title" 
+              value={blogForm.title} 
+              onChange={handleBlogChange} 
+              className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all" 
+              required 
+            />
           </div>
-        </div>
-      )}
+
+          {/* Content Field */}
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-gray-600 ml-1">Content</label>
+            <textarea 
+              name="content" 
+              placeholder="What's happening on your farm? Write here..." 
+              value={blogForm.content} 
+              onChange={handleBlogChange} 
+              className="w-full p-4 border border-gray-200 rounded-2xl h-56 resize-none focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all" 
+              required 
+            />
+          </div>
+
+          {/* Image Upload Field */}
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-gray-600 ml-1">Cover Image</label>
+            <label className="block border-2 border-dashed border-gray-200 hover:border-black rounded-2xl p-6 text-center cursor-pointer bg-gray-50/50 hover:bg-gray-50 transition-all">
+              {previewBlogImage ? (
+                <div className="relative group">
+                  <img src={previewBlogImage} className="mx-auto max-h-52 rounded-xl shadow-md" alt="Preview" />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 rounded-xl transition-all">
+                    <p className="text-white text-sm font-medium">Change Cover Photo</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto text-gray-400">
+                    <BookOpen size={24} />
+                  </div>
+                  <p className="text-gray-500 font-medium">Upload blog cover image</p>
+                  <p className="text-xs text-gray-400">Recommended size: 1200x630 (PNG, JPG)</p>
+                </div>
+              )}
+              <input type="file" accept="image/*" onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  setBlogForm(b => ({...b, blogImage: file}));
+                  setPreviewBlogImage(URL.createObjectURL(file));
+                }
+              }} className="hidden" />
+            </label>
+          </div>
+
+          {/* Action Buttons - Sticky at bottom of card */}
+          <div className="flex gap-4 pt-4 sticky bottom-0 bg-white pb-2">
+            <button 
+              type="button" 
+              onClick={() => {setShowAddBlog(false); resetBlogForm();}} 
+              className="flex-1 py-4 border border-gray-200 text-gray-600 rounded-2xl font-semibold hover:bg-gray-50 transition-all active:scale-[0.98]"
+            >
+              Discard
+            </button>
+            <button 
+              type="submit" 
+              disabled={submitting} 
+              className="flex-1 py-4 bg-black text-white rounded-2xl font-bold text-lg transition-all shadow-lg shadow-gray-200 flex items-center justify-center gap-3 disabled:bg-gray-400 disabled:shadow-none active:scale-[0.98]"
+            >
+              {submitting ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Publishing...</span>
+                </>
+              ) : (
+                "Publish Post"
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+)}
+      
       <ToastContainer
         position="top-right"
         autoClose={3000}

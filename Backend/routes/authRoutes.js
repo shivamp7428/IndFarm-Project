@@ -1,5 +1,5 @@
 import express from 'express';
-import {  login, updateProfile, changePassword, deleteAccount, signup, getProfile, sendOTP, verifyOTP } from '../controllers/authController.js';
+import {  login, updateProfile, changePassword, deleteAccount, signup, getProfile, sendOTP, verifyOTP, getFarmerById } from '../controllers/authController.js';
 import auth from '../middlewares/auth.js';
 import { upload } from '../config/cloudinary.js';
 
@@ -14,5 +14,5 @@ UserRouter.get('/me',auth, getProfile);
 UserRouter.put('/update',auth,upload.fields([{ name: "farmImage", maxCount: 1 },{ name: "profileImage", maxCount: 1 }]),updateProfile);
 UserRouter.put('/change-password',auth, changePassword);
 UserRouter.delete('/delete',auth, deleteAccount);
-
+UserRouter.get("/:id", getFarmerById);
 export default UserRouter;

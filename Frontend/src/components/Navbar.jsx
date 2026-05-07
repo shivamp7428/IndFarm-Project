@@ -1,12 +1,9 @@
 "use client";
-
 import React, { useState, useRef, useEffect } from "react";
-import { 
-  Leaf, ShoppingCart, Package, Search, MapPin, Menu, X, User, 
-  ChevronRight, ChevronDown, Home, ShoppingBag, Settings, LogOut, 
-  Info, LayoutDashboard, Globe, Bell 
-} from "lucide-react";
+import { Leaf, ShoppingCart, Package, Search, MapPin, Menu, X, User, ChevronRight, ChevronDown, Home, ShoppingBag, Settings, LogOut, Info, LayoutDashboard, Globe, Bell } from "lucide-react";
 import { useTranslation } from "../context/LanguageContext";
+import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 function decodeJWT(token) {
   try {
@@ -99,81 +96,117 @@ function SearchBar() {
   );
 }
 
-function AccountDropdown({ isLoggedIn, userName, user, onLogout }) {
-  const { lang, toggleLanguage, translations: t } = useTranslation();
+function AccountDropdown() {
+   const { translations: t } = useTranslation();
+  const { user, isAuthenticated, logout } = useAuth();
+  const { lang, toggleLanguage} = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const userId = user?.id || user?._id;
-
+  const userId = user?._id || user?.id;
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsOpen(false);
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+
   return (
     <div className="relative" ref={dropdownRef}>
-      <button 
-        onClick={() => setIsOpen(!isOpen)} 
+      {/* BUTTON */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-2xl transition-all"
       >
+        {/* MOBILE ICON */}
         <div className="lg:hidden h-10 w-10 bg-emerald-100 flex items-center justify-center rounded-xl text-emerald-700">
           <User size={20} />
         </div>
+
+        {/* DESKTOP */}
         <div className="hidden lg:block text-left">
           <p className="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">
-            {isLoggedIn ? `${t.hello}, ${userName}` : "Hello, Sign in"}
+            {isAuthenticated
+              ? `Hello, ${user?.fullName?.split(" ")[0] || "User"}`
+              : `Hello,${t.signin}`}
           </p>
+
           <p className="text-sm font-black text-slate-800 flex items-center gap-1">
-            {t.account} <ChevronDown size={14} className={isOpen ? "rotate-180" : ""} />
+            {t.account}
+            <ChevronDown
+              size={14}
+              className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
+            />
           </p>
         </div>
       </button>
 
+      {/* DROPDOWN */}
       {isOpen && (
         <div className="absolute top-[calc(100%+8px)] right-0 w-64 bg-white border border-slate-100 rounded-3xl shadow-2xl p-4 z-[110]">
-          {!isLoggedIn ? (
+          
+          {/* LOGIN BUTTON */}
+          {!isAuthenticated ? (
             <div className="text-center border-b border-slate-50 pb-4 mb-4">
               <a href="/auth" className="block w-full">
-                <button className="w-full bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-sm">{t.signin}</button>
+                <button className="w-full bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-sm">
+                  {t.signin}
+                </button>
               </a>
             </div>
           ) : (
             <div className="px-3 pb-2 mb-2 border-b border-slate-50">
-              <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Active Session</p>
+              <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+                Active Session
+              </p>
             </div>
           )}
-          
-          <div className="space-y-1">
-            <button 
-              onClick={toggleLanguage} 
-              className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600"
-            >
-              <div className="flex items-center gap-3"><Globe size={16} /> <span>{t.language}</span></div>
-              <span className="text-[10px] font-black text-emerald-600">{lang === "en" ? "HI" : "EN"}</span>
-            </button>
 
-            {isLoggedIn && userId && (
-              <a 
-                href={user?.role === "farmer" ? `/farmer-dashboard/${userId}` : `/user-dashboard/${userId}`} 
+          {/* OPTIONS */}
+          <div className="space-y-1">
+
+           <button
+            onClick={toggleLanguage}
+            className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600"
+          >
+            <div className="flex items-center gap-3">
+              <Globe size={16} />
+              <span>{t.language}</span>
+            </div>
+
+            <span className="text-[10px] font-black text-emerald-600">
+              {lang === "en" ? "HI" : "EN"}
+            </span>
+          </button>
+            {/* DASHBOARD */}
+            {isAuthenticated && userId && (
+              <a
+                href={
+                  user?.role === "farmer"
+                    ? `/farmer-dashboard/${userId}`
+                    : `/user-dashboard/${userId}`
+                }
                 className="block"
               >
                 <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
-                  <LayoutDashboard size={16} /> 
-                  {t.dashboard}
+                  <LayoutDashboard size={16} />
+                   {t.dashboard}
                 </button>
               </a>
             )}
 
-            {isLoggedIn && (
-              <button 
-                onClick={onLogout} 
+            {/* LOGOUT */}
+            {isAuthenticated && (
+              <button
+                onClick={logout}
                 className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 rounded-xl text-sm font-bold text-red-600"
               >
-                <LogOut size={16} /> {t.logout}
+                <LogOut size={16} />
+                {t.logout}
               </button>
             )}
           </div>
@@ -183,15 +216,20 @@ function AccountDropdown({ isLoggedIn, userName, user, onLogout }) {
   );
 }
 
-function MobileMenu({ isOpen, setIsOpen, userName, isLoggedIn, user, onLogout }) {
+
+function MobileMenu({ isOpen, setIsOpen }) {
+  
+  const { user, isAuthenticated, logout } = useAuth();   // Backend se user fetch
+  
   const { lang, toggleLanguage, translations: t } = useTranslation();
-  const userId = user?.id || user?._id;
+  
+  const userId = user?._id || user?.id;
 
   const navItems = [
     { name: t.home, icon: Home, link: "/" },
     { name: t.shopcategories, icon: ShoppingBag, link: "/categories" },
     { name: t.myorders, icon: Package, link: "/orders" },
-    ...(isLoggedIn && userId ? [{
+    ...(isAuthenticated && userId ? [{
       name: user.role === "farmer" ? t.dashboard : t.dashboard,
       icon: LayoutDashboard,
       link: user.role === "farmer" ? `/farmer-dashboard/${userId}` : `/user-dashboard/${userId}`
@@ -202,9 +240,13 @@ function MobileMenu({ isOpen, setIsOpen, userName, isLoggedIn, user, onLogout })
 
   return (
     <>
-      <div className={`fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[150] transition-opacity ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`} onClick={() => setIsOpen(false)} />
+      <div 
+        className={`fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[150] transition-opacity ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`} 
+        onClick={() => setIsOpen(false)} 
+      />
       
       <div className={`fixed top-0 left-0 h-full w-[300px] bg-white z-[160] shadow-2xl transform transition-transform duration-500 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        
         <div className="bg-slate-900 text-white p-6 rounded-br-[2.5rem]">
           <div className="flex justify-between items-center mb-6">
             <div className="h-12 w-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg">
@@ -214,16 +256,27 @@ function MobileMenu({ isOpen, setIsOpen, userName, isLoggedIn, user, onLogout })
               <X size={24} />
             </button>
           </div>
+          
           <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">
-            {isLoggedIn ? t.hello : t.welcome}
+            {isAuthenticated ? t.hello : t.welcome}
           </p>
-          <a href={isLoggedIn ? "/profile" : "/auth"} onClick={() => setIsOpen(false)}>
-            <p className="text-xl font-black">{isLoggedIn ? userName : t.signin}</p>
+          
+          <a 
+            href={isAuthenticated ? "/profile" : "/auth"} 
+            onClick={() => setIsOpen(false)}
+          >
+            <p className="text-xl font-black">
+              {isAuthenticated ? (user?.fullName || "User") : t.signin}
+            </p>
           </a>
         </div>
 
         <nav className="py-6">
-          <button onClick={toggleLanguage} className="w-full flex items-center justify-between px-8 py-4 hover:bg-slate-50 border-b border-slate-50">
+          {/* Language Toggle */}
+          <button 
+            onClick={toggleLanguage} 
+            className="w-full flex items-center justify-between px-8 py-4 hover:bg-slate-50 border-b border-slate-50"
+          >
             <div className="flex items-center gap-4">
               <Globe size={20} className="text-emerald-600" /> 
               <span className="font-bold text-slate-700 text-sm">{t.language}</span>
@@ -233,6 +286,7 @@ function MobileMenu({ isOpen, setIsOpen, userName, isLoggedIn, user, onLogout })
             </span>
           </button>
 
+          {/* Navigation Items */}
           {navItems.map((item) => (
             <a href={item.link} key={item.name} onClick={() => setIsOpen(false)} className="block">
               <button className="w-full flex items-center justify-between px-8 py-4 hover:bg-slate-50 text-slate-700">
@@ -245,9 +299,14 @@ function MobileMenu({ isOpen, setIsOpen, userName, isLoggedIn, user, onLogout })
             </a>
           ))}
 
-          {isLoggedIn && (
-            <button onClick={onLogout} className="w-full flex items-center gap-4 px-8 py-4 hover:bg-red-50 text-red-600 mt-2">
-              <LogOut size={20} /> <span className="font-bold text-sm">{t.logout}</span>
+          {/* Logout */}
+          {isAuthenticated && (
+            <button 
+              onClick={logout} 
+              className="w-full flex items-center gap-4 px-8 py-4 hover:bg-red-50 text-red-600 mt-2"
+            >
+              <LogOut size={20} /> 
+              <span className="font-bold text-sm">{t.logout}</span>
             </button>
           )}
         </nav>
@@ -255,6 +314,7 @@ function MobileMenu({ isOpen, setIsOpen, userName, isLoggedIn, user, onLogout })
     </>
   );
 }
+
 
 // MAIN NAVBAR 
 
@@ -353,12 +413,7 @@ export function Navbar({ cartCount = 0 }) {
               </button>
             </a>
 
-            <AccountDropdown 
-              isLoggedIn={isLoggedIn} 
-              userName={userName} 
-              user={user}
-              onLogout={handleLogout} 
-            />
+            <AccountDropdown/>
 
             <a href="/cart" className="block ml-1">
               <button className="relative p-3 bg-slate-900 text-white hover:bg-black/80 rounded-2xl transition-all shadow-lg shadow-slate-200">

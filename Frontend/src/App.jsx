@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+
 import { Navbar } from "./components/Navbar";
 import { AIChatbot } from "./components/AIChatbot";
 import AuthPage from "./components/AuthPage";
@@ -17,16 +18,17 @@ import BlogPage from "./page/Blog";
 import FAQPage from "./page/FAQ";
 import TermsPage from "./page/Terms";
 import RefundPage from "./page/Refund";
-
-import PrivateRoute from "./route/PrivateRoute"; 
+import PrivateRoute from "./route/PrivateRoute";
 import PublicRoute from "./route/PublicRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 import FarmerDashboard from "./page/FarmerDashboard";
 import UserDashboard from "./page/UserDashboard";
+import { AuthProvider } from "./context/AuthContext";   
+import Marketplace from "./page/MarketPlace";
 
 function App() {
   return (
-    <>
+    <AuthProvider>   
       <ScrollToTop />
       <Navbar />
       <Routes>
@@ -38,9 +40,11 @@ function App() {
         <Route path="/faqs" element={<FAQPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/refund" element={<RefundPage />} />
+        <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/detail/:id" element={<Detail />} />
-        <Route path="/farmer-profile/:id" element={<FarmerProfile />} />
+        <Route path="/farmerProfile/:id" element={<FarmerProfile />} />
 
+        {/* Public Route */}
         <Route 
           path="/auth" 
           element={
@@ -74,27 +78,29 @@ function App() {
             </PrivateRoute>
           } 
         />
-        
-        <Route path="/farmer-dashboard/:id" 
-            element={
-             <ProtectedRoute allowedRoles={["farmer"]}>
-               <FarmerDashboard />
+
+        <Route 
+          path="/farmer-dashboard/:id" 
+          element={
+            <ProtectedRoute allowedRoles={["farmer"]}>
+              <FarmerDashboard />
             </ProtectedRoute>
-             } 
+          } 
         />
 
-        <Route path="/user-dashboard/:id" 
-           element={
-             <ProtectedRoute allowedRoles={["customer", "user"]}>
-             <UserDashboard />
-             </ProtectedRoute>
+        <Route 
+          path="/user-dashboard/:id" 
+          element={
+            <ProtectedRoute allowedRoles={["customer", "user"]}>
+              <UserDashboard />
+            </ProtectedRoute>
           } 
         />
       </Routes>
 
       <AIChatbot />
       <Footer />
-    </>
+    </AuthProvider>
   );
 }
 

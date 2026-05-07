@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const productSchema = new mongoose.Schema({
   farmerId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'farmer',
+    ref: 'User',
     required: true
   },
   name: {
@@ -16,11 +16,11 @@ const productSchema = new mongoose.Schema({
     required: true
   },
   unit: {
-    type: String, //kg, gram, piece, litre
+    type: String,
     required: true
   },
   category: {
-    type: String, //  Vegetables, Fruits, Grains
+    type: String, 
     required: true
   },
   description: {

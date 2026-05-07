@@ -27,6 +27,7 @@ export const getAllBlogs = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 export const getBlogsByFarmer = async (req, res) => {
   try {
     const { id } = req.params; 

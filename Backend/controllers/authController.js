@@ -20,7 +20,7 @@ export const signup = async (req, res) => {
     const { fullName, identifier, password, role, farmName, farmLocation, farmingType, products, deliveryAddress, pincode } = req.body;
     const existingUser = await User.findOne({ identifier });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists with this email/phone" });
+      return res.status(400).json({ message: "User already exists with this email" });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -332,5 +332,34 @@ export const deleteAccount = async (req, res) => {
     return res.status(200).json({ success: true, message: "Account deleted successfully" });
   } catch (error) {
     return res.status(500).json({ message: "Delete failed" });
+  }
+};
+
+
+// GET single farmer by ID
+export const getFarmerById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const farmer = await User.findById(id).select("-password -otp -otpExpiry");
+
+    if (!farmer) {
+      return res.status(404).json({
+        success: false,
+        message: "Farmer not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      farmer,
+    });
+
+  } catch (error) {
+    console.log("GET FARMER ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
   }
 };
