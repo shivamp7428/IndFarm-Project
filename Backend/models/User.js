@@ -11,7 +11,18 @@ const userSchema = new mongoose.Schema({
     lowercase: true 
   },
 
-  password: { type: String, required: true },
+  password: { 
+    type: String, 
+    required: function() {
+      return !this.googleId; 
+    }
+  },
+
+  googleId: { 
+    type: String, 
+    unique: true, 
+    sparse: true 
+  },
 
   role: { 
     type: String, 
@@ -19,60 +30,20 @@ const userSchema = new mongoose.Schema({
     required: true 
   },
 
-  deliveryAddress: { 
-    type: String,
-    default: ""  
-  },
+  deliveryAddress: { type: String, default: "" },
+  pincode: { type: String, default: "" },
 
-  pincode: { 
-    type: String,
-    default: ""   
-  },
+  farmName: { type: String, default: "" },
+  farmLocation: { type: String, default: "" },
+  farmingType: { type: String, default: "" },
+  products: [{ type: String, default: [] }],
+  farmImageUrl: { type: String, default: "" },
 
-  farmName: { 
-    type: String,
-    default: ""   
-  },
+  img: { type: String, default: "" },
 
-  farmLocation: {  
-    type: String,
-    default: ""
-  },
-
-  farmingType: { 
-    type: String,
-    default: ""
-  },
-
-  products: [{ 
-    type: String,
-    default: []   
-  }],
-
-  farmImageUrl:{ 
-    type: String,
-    default: ""
-  },
-
-  img:{
-    type: String, 
-    default: ""
-  },
-
-  isVerified: { 
-    type: Boolean, 
-    default: false 
-  },
-
-  otp: {
-    type: String,
-    default: ""
-  },
-
-  otpExpiry: {
-    type: Date,
-    default: null
-  },
+  isVerified: { type: Boolean, default: false },
+  otp: { type: String, default: null }, 
+  otpExpiry: { type: Date, default: null },
 
   about: {
     type: String,

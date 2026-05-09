@@ -25,6 +25,7 @@ import FarmerDashboard from "./page/FarmerDashboard";
 import UserDashboard from "./page/UserDashboard";
 import { AuthProvider } from "./context/AuthContext";   
 import Marketplace from "./page/MarketPlace";
+import LoginSuccess from "./components/LoginSuccess";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/login-success" element={<LoginSuccess />} />
         <Route path="/impact" element={<ImpactPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/faqs" element={<FAQPage />} />

@@ -7,6 +7,8 @@ import UserRouter from './routes/authRoutes.js';
 import dns from 'dns';
 import productRoutes from "./routes/productRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
+import passport from 'passport';
+import './config/passport.js';
 
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
@@ -15,6 +17,7 @@ connectDB();
 
 const app = express();
 
+app.use(passport.initialize());
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
