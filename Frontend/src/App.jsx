@@ -25,7 +25,11 @@ import FarmerDashboard from "./page/FarmerDashboard";
 import UserDashboard from "./page/UserDashboard";
 import { AuthProvider } from "./context/AuthContext";   
 import Marketplace from "./page/MarketPlace";
+<<<<<<< HEAD
 import LoginSuccess from "./components/LoginSuccess";
+=======
+import DeliveryForm from "./page/DeliveryForm";
+>>>>>>> 72ebd1e (Added Comment and Delivery Section)
 
 function App() {
   return (
@@ -95,6 +99,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["customer", "user"]}>
               <UserDashboard />
+            </ProtectedRoute>
+          } 
+        />
+         <Route 
+          path="/become-delivery-man/:id" 
+          element={
+            <ProtectedRoute allowedRoles={["customer", "user"]}>
+              <DeliveryForm />
             </ProtectedRoute>
           } 
         />

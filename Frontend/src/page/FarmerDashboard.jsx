@@ -12,6 +12,7 @@ import { useTranslation } from "../context/LanguageContext";
 import { ToastContainer, toast } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 import Swal from "sweetalert2";
+import FarmerReviewSection from "./Comment";
 
 export default function FarmerDashboard() {
   const { translations: t } = useTranslation();
@@ -970,9 +971,8 @@ const handleDeleteBlog = async (id) => {
 )}
 
         {activeTab === "reviews" && (
-          <div className="py-20 text-center text-gray-400">
-            <Star size={64} className="mx-auto mb-4 opacity-20 text-emerald-600" />
-            <h3>No Reviews Yet</h3>
+          <div>
+            <FarmerReviewSection/>
           </div>
         )}
       </div>

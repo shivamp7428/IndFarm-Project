@@ -2,12 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  MapPin, Star, Users, Package, ArrowLeft,
-  BookOpen, ShoppingBasket, Loader2, X
-} from "lucide-react";
+import {MapPin, Star, Users, Package, ArrowLeft,BookOpen, ShoppingBasket, Loader2, X, StarHalf, Trash2} from "lucide-react";
 import { useTranslation } from "../context/LanguageContext";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 export default function FarmerProfile() {
   const { id } = useParams();
@@ -17,17 +15,13 @@ export default function FarmerProfile() {
   const [farmer, setFarmer] = useState(null);
   const [products, setProducts] = useState([]);
   const [blogs, setBlogs] = useState([]);
+  const [reviews, setReviews] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("products");
 
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedBlog, setSelectedBlog] = useState(null);
-
-  const [reviews, setReviews] = useState([
-    { id: 1, name: "Rahul Sharma", rating: 5, comment: "Amazing fresh vegetables!", date: "2 days ago" },
-    { id: 2, name: "Anita Desai", rating: 4, comment: "The honey is pure and delicious.", date: "1 week ago" }
-  ]);
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
 
   const DEFAULT_FARM_IMAGE = "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1600";
@@ -36,82 +30,166 @@ export default function FarmerProfile() {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    const fetchAllData = async () => {
-      setLoading(true);
-      setError(null);
+const fetchAllData = async () => {
+  setLoading(true);
 
-      try {
-        const token = localStorage.getItem("token");
-        const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  try {
 
-        const farmerUrl = `http://localhost:5000/api/auth/${id}`;
-        const productUrl = `http://localhost:5000/api/products/farmer/${id}`;
-        const blogUrl = `http://localhost:5000/api/blogs/farmer/${id}`;
+    const token = localStorage.getItem("token");
 
-        const [farmerRes, productsRes, blogsRes] = await Promise.allSettled([
-          axios.get(farmerUrl, config),
-          axios.get(productUrl, config),
-          axios.get(blogUrl, config),
-        ]);
-
-        // === Robust Data Extraction ===
-        let farmerData = null;
-        if (farmerRes.status === "fulfilled") {
-          const resData = farmerRes.value.data;
-          farmerData = resData?.farmer || resData?.data || resData;
+    const config = token
+      ? {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
+      : {};
 
-        let productData = [];
-        if (productsRes.status === "fulfilled") {
-          const resData = productsRes.value.data;
-          productData = resData?.products || resData?.data || resData || [];
-        }
+    const farmerUrl = `http://localhost:5000/api/auth/${id}`;
+    const productUrl = `http://localhost:5000/api/products/farmer/${id}`;
+    const blogUrl = `http://localhost:5000/api/blogs/farmer/${id}`;
+    const commentUrl = `http://localhost:5000/api/comment/farmer/${id}`;
 
-        let blogData = [];
-        if (blogsRes.status === "fulfilled") {
-          const resData = blogsRes.value.data;
-          blogData = resData?.blogs || resData?.data || resData || [];
-        }
+    const [
+      farmerRes,
+      productsRes,
+      blogsRes,
+      commentsRes,
+    ] = await Promise.all([
+      axios.get(farmerUrl, config),
+      axios.get(productUrl, config),
+      axios.get(blogUrl, config),
+      axios.get(commentUrl, config),
+    ]);
 
-        if (!farmerData) {
-          throw new Error("Farmer data not found");
-        }
+    setFarmer(
+      farmerRes.data.farmer ||
+      farmerRes.data.data ||
+      farmerRes.data
+    );
 
-        setFarmer(farmerData);
-        setProducts(Array.isArray(productData) ? productData : []);
-        setBlogs(Array.isArray(blogData) ? blogData : []);
-      } catch (err) {
-        console.error("API ERROR:", err);
-        if (err?.response?.status === 401) {
-          setError("Unauthorized access. Please login again.");
-          localStorage.removeItem("token");
-        } else {
-          setError(err.message || "Failed to load farmer profile");
-        }
-        setFarmer(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setProducts(
+      productsRes.data.products ||
+      productsRes.data.data ||
+      []
+    );
+
+    setBlogs(
+      blogsRes.data.blogs ||
+      blogsRes.data.data ||
+      []
+    );
+
+    // COMMENTS
+    setReviews(
+      commentsRes.data.comments || []
+    );
+
+    console.log("COMMENTS:", commentsRes.data.comments);
+
+  } catch (err) {
+
+    console.log(err);
+
+    setError("Failed to load profile");
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
 
     if (id) fetchAllData();
   }, [id]);
 
-  const handleSubmitReview = () => {
-    if (!newReview.comment.trim()) return alert("Please write a comment");
+  
+const fetchAllData = async () => {
+  setLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+    const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
-    const reviewToAdd = {
-      id: Date.now(),
-      name: "You",
-      rating: newReview.rating,
-      comment: newReview.comment,
-      date: "Just now"
-    };
+    const farmerUrl = `http://localhost:5000/api/auth/${id}`;
+    const productUrl = `http://localhost:5000/api/products/farmer/${id}`;
+    const blogUrl = `http://localhost:5000/api/blogs/farmer/${id}`;
+    
+    const commentUrl = `http://localhost:5000/api/comment/farmer/${id}`; 
 
-    setReviews([reviewToAdd, ...reviews]);
-    setNewReview({ rating: 5, comment: "" });
-  };
+    const [farmerRes, productsRes, blogsRes, commentsRes] = await Promise.allSettled([
+      axios.get(farmerUrl, config),
+      axios.get(productUrl, config),
+      axios.get(blogUrl, config),
+      axios.get(commentUrl, config), 
+    ]);
 
+    if (farmerRes.status === "fulfilled") {
+      setFarmer(farmerRes.value.data.farmer || farmerRes.value.data);
+    }
+
+    if (productsRes.status === "fulfilled") {
+      setProducts(productsRes.value.data.products || productsRes.value.data);
+    }
+
+    if (blogsRes.status === "fulfilled") {
+      setBlogs(blogsRes.value.data.blogs || blogsRes.value.data);
+    }
+
+    if (commentsRes.status === "fulfilled") {
+      const commentData = commentsRes.value.data.comments || [];
+      setReviews(commentData); 
+    }
+
+  } catch (err) {
+    console.error("Data fetch error:", err);
+    setError("Profile load karne mein dikkat aa rahi hai");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const token = localStorage.getItem("token");
+  let loggedInUserId = null;
+  
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      loggedInUserId = decoded.id || decoded._id || decoded.userId;
+    } catch (error) {
+      console.error("Invalid token");
+    }
+  }
+const handleDeleteComment = async (commentId) => {
+  const token = localStorage.getItem("token");
+  const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+
+  const result = await Swal.fire({
+    title: "Are you sure?",
+    text: "You won't be able to revert this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#10b981", 
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, delete it!"
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await axios.delete(`http://localhost:5000/api/comment/delete/${commentId}`, config);
+      
+      toast.success("Review deleted!");
+      
+      if (typeof fetchAllData === 'function') {
+        fetchAllData(); 
+      } else {
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete review");
+    }
+  }
+};
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -138,6 +216,22 @@ export default function FarmerProfile() {
   const farmCover = farmer?.farmImageUrl?.trim() || DEFAULT_FARM_IMAGE;
   const profileImg = farmer?.img || farmer?.profileImage || DEFAULT_AVATAR;
 
+
+  const formatTimeAgo = (date) => {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1) return interval + " year" + (interval > 1 ? "s" : "") + " ago";
+    interval = Math.floor(seconds / 2592000);
+    if (interval >= 1) return interval + " month" + (interval > 1 ? "s" : "") + " ago";
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) return interval + " day" + (interval > 1 ? "s" : "") + " ago";
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) return interval + " hr" + (interval > 1 ? "s" : "") + " ago";
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1) return interval + " min" + (interval > 1 ? "s" : "") + " ago";
+    return "just now";
+  };
+  
   return (
     <section className="bg-slate-50 min-h-screen pb-20">
       <div className="relative h-[280px] md:h-[360px] w-full overflow-hidden">
@@ -344,51 +438,95 @@ export default function FarmerProfile() {
           </div>
         )} 
 
-       {/* Reviews Tab */}
-        {activeTab === "reviews" && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="bg-gray-50 border border-gray-100 rounded-[2.5rem] p-6 md:p-10 mb-12 shadow-sm">
-              <h3 className="font-bold text-xl mb-6 text-gray-900">{t.rateExperience || "Rate Your Experience"}</h3>
-              <div className="max-w-md mb-10">
-                <p className="text-sm font-bold text-emerald-600 mb-1">{t.yourRating || "Your Rating"}</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-gray-900">{newReview.rating}</span>
-                  <span className="text-gray-400 font-bold">/ 5</span>
-                </div>
-                <input
-                  type="range" min="0" max="5" step="0.5" value={newReview.rating}
-                  onChange={(e) => setNewReview(prev => ({...prev, rating: parseFloat(e.target.value)}))}
-                  className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-emerald-600 mt-4"
+      {activeTab === "reviews" && (
+  <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
+      {reviews && reviews.length > 0 ? (
+        reviews.map((comment) => (
+          <div key={comment._id} className="bg-white border border-gray-200 p-5 md:p-6 hover:shadow-md transition-all group">
+            
+            <div className="flex justify-between items-start mb-6 pb-4 border-b border-gray-50">
+              <div className="flex items-center gap-3">
+                <img 
+                  src={comment.userId?.img || "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
+                  className="w-12 h-12 rounded-full object-cover ring-4 ring-emerald-50" 
+                  alt="user" 
                 />
+                <div className="flex flex-col">
+                  <h4 className="font-black text-gray-900 text-sm md:text-base leading-tight">
+                    {comment.userId?.fullName || "Kharidne Wala"}
+                  </h4>
+                  <span className="text-[10px] font-bold text-gray-400 tracking-widest">
+                    {formatTimeAgo(comment.createdAt)}
+                  </span>
+                </div>
               </div>
-              <textarea
-                value={newReview.comment}
-                onChange={(e) => setNewReview(prev => ({...prev, comment: e.target.value}))}
-                placeholder={t.writeYourReview || "Tell others about the quality..."}
-                className="w-full h-32 p-5 rounded-2xl border border-gray-200 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all mb-6"
-              />
-              <button onClick={handleSubmitReview} className="bg-black text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all">
-                {t.submitReview || "Post Review"}
-              </button>
+
+              <div className="flex flex-col items-end gap-3">
+                {comment.productId && (
+                  <div 
+                    onClick={() => navigate(`/detail/${comment.productId._id}`)}
+                    className="flex items-center gap-3 cursor-pointer group/prod text-right"
+                  >
+                    <div className="flex flex-col items-end">
+                      <h4 className="font-black text-black text-sm md:text-base leading-tight group-hover/prod:underline">
+                        {comment.productId.name}
+                      </h4>
+                      <div className="flex gap-0.5 mt-1">
+                        {[...Array(5)].map((_, i) => {
+                          const starVal = i + 1;
+                          const rating = comment.rating || 5;
+                          return (
+                            <Star 
+                              key={i} 
+                              size={12} 
+                              fill={rating >= starVal ? "#fbbf24" : "none"} 
+                              color={rating >= starVal ? "#fbbf24" : "#e5e7eb"} 
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <img 
+                      src={comment.productId.productImageUrl || "https://via.placeholder.com/150"} 
+                      className="w-12 h-12 rounded-xl object-cover ring-4 ring-gray-50 shadow-sm border border-gray-100" 
+                      alt="product" 
+                    />
+                  </div>
+                )}
+
+                {loggedInUserId && String(loggedInUserId) === String(comment.userId?._id || comment.userId) && (
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <button 
+                      onClick={() => handleDeleteComment(comment._id)} 
+                      className="flex items-center gap-1 text-red-500 hover:text-red-700 transition-all p-2 cursor-pointer"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="space-y-8">
-              {reviews.map((review) => (
-                <div key={review.id} className="border-b border-gray-100 pb-8">
-                  <div className="flex items-center justify-between">
-                    <div className="font-semibold">{review.name === "You" ? (t.you || "You") : review.name}</div>
-                    <div className="text-sm text-gray-500">{review.date === "Just now" ? (t.justNow || "Just now") : review.date}</div>
-                  </div>
-                  <div className="flex text-amber-400 mt-1">
-                    {[...Array(5)].map((_, i) => <span key={i}>{i < review.rating ? "★" : "☆"}</span>)}
-                  </div>
-                  <p className="mt-3 text-gray-700">{review.comment}</p>
-                </div>
-              ))}
+            <div className="relative">
+              <div className="bg-slate-50 p-3 border border-slate-100 relative">
+                <p className="text-gray-700 leading-relaxed font-medium text-sm md:text-base">
+                  {comment.comment}
+                </p>
+                <div className="absolute -top-2 left-6 w-4 h-4 bg-slate-50 rotate-45 border-l border-t border-slate-100"></div>
+              </div>
             </div>
           </div>
-        )}
-      </div>
+        ))
+      ) : (
+        <div className="text-center py-20 bg-gray-50 rounded-[3rem] border border-dashed border-gray-200 text-gray-400 font-bold italic">
+          No reviews yet. Be the first!
+        </div>
+      )}
+    </div>
+  </div>
+)}
+</div>
 
 {selectedProduct && (
   <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4 backdrop-blur-sm animate-in fade-in duration-300 overflow-y-auto">

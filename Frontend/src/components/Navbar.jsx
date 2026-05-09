@@ -152,6 +152,32 @@ function AccountDropdown() {
 
   }, []);
 
+// CHECK DELIVERY PARTNER
+const [deliveryPartner,setDeliveryPartner] =
+useState(null);
+useEffect(()=>{
+   const checkDeliveryPartner = async()=>{
+      try{
+         if(!isAuthenticated ||user?.role === "farmer") return;
+         const { data } = await axios.get(
+            `http://localhost:5000/api/delivery/status/${userId}`,
+            {
+               withCredentials:true
+            }
+         );
+
+         if(data.success){
+            setDeliveryPartner(
+               data.deliveryPartner
+            );
+         }
+      }catch(error){
+         console.log(error);
+      }
+   }
+   checkDeliveryPartner();
+},[isAuthenticated,userId,user]);
+
   return (
     <div className="relative" ref={dropdownRef}>
       {/* BUTTON */}
@@ -224,37 +250,74 @@ function AccountDropdown() {
               {lang === "en" ? "HI" : "EN"}
             </span>
           </button>
-                    {isAuthenticated && userId && (
-                         <>
-                            <a
-                             href={
-                              user?.role === "farmer"
-                              ? `/farmer-dashboard/${userId}` : `/user-dashboard/${userId}`
-                              }
-                             className="block"
-                          >
-                          <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
-                          <LayoutDashboard size={16} />
-                         {t.dashboard}
-                   </button>
-               </a>
+    {isAuthenticated && userId && (
 
-             {user?.role !== "farmer" && (
-              <a
-                href="/become-delivery-man"
-              className="block mt-2"
-               >
-              <button className="w-full flex items-center gap-3 px-3 py-2.5  rounded-xl hover:bg-slate-50 text-sm font-bold  transition-all text-slate-600">
-          
-             <Truck size={16} />
+<>
+   {/* FARMER DASHBOARD */}
 
-             Become Delivery Man
-        </button>
+   {
+      user?.role === "farmer" && (
+
+      <a
+         href={`/farmer-dashboard/${userId}`}
+         className="block"
+      >
+
+         <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
+
+            <LayoutDashboard size={16} />
+
+            Dashboard
+
+         </button>
+
       </a>
-    )}
-  </>
-               )}
+   )}
 
+   {/* USER DELIVERY SECTION */}
+
+   {
+      user?.role !== "farmer" && (
+
+      deliveryPartner ? (
+
+         <a
+            href={`/user-delivery-dashboard/${userId}/${deliveryPartner._id}`}
+            className="block"
+         >
+
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
+
+               <LayoutDashboard size={16} />
+
+               Dashboard
+
+            </button>
+
+         </a>
+
+      ) : (
+
+         <a
+            href={`/become-delivery-man/${userId}`}
+            className="block"
+         >
+
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 text-sm font-bold transition-all text-slate-600">
+
+               <Truck size={16} />
+
+               Become Delivery Partner
+
+            </button>
+
+         </a>
+
+      )
+   )}
+
+</>
+)}
             {/* LOGOUT */}
             {isAuthenticated && (
               <button

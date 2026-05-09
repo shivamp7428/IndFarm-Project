@@ -7,8 +7,13 @@ import UserRouter from './routes/authRoutes.js';
 import dns from 'dns';
 import productRoutes from "./routes/productRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
+<<<<<<< HEAD
 import passport from 'passport';
 import './config/passport.js';
+=======
+import CommentRoute from './routes/CommentRoute.js'
+import DeliveryRoute from './routes/DeliveryRoute.js';
+>>>>>>> 72ebd1e (Added Comment and Delivery Section)
 
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
@@ -29,6 +34,8 @@ app.use(morgan("dev"));
 app.use("/api/auth", UserRouter);
 app.use("/api/products", productRoutes);
 app.use("/api/blogs", blogRoutes);
+app.use("/api/comment",CommentRoute);
+app.use("/api/delivery",DeliveryRoute);
 
 
 const port = process.env.PORT || 5000;

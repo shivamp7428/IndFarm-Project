@@ -143,7 +143,7 @@ const AuthPage = () => {
           if (result.otpRequired) {
             setTempIdentifier(formData.identifier);
             setShowOtp(true);
-            toast.info("OTP sent to your registered contact");
+            toast.info("OTP sent to your registered Email");
           } else {
             toast.success("Login Successful!");
             localStorage.setItem('token', result.token);

@@ -29,9 +29,20 @@ const userSchema = new mongoose.Schema({
     enum: ['farmer', 'customer'], 
     required: true 
   },
+<<<<<<< HEAD
 
   deliveryAddress: { type: String, default: "" },
   pincode: { type: String, default: "" },
+=======
+  phone:{
+    type : String,
+    default:""
+  },
+  deliveryAddress: { 
+    type: String,
+    default: ""  
+  },
+>>>>>>> 72ebd1e (Added Comment and Delivery Section)
 
   farmName: { type: String, default: "" },
   farmLocation: { type: String, default: "" },
@@ -62,5 +73,5 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 export default User;
