@@ -1,9 +1,10 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { Leaf, ShoppingCart, Package, Search, MapPin, Menu, X, User, ChevronRight, ChevronDown, Home, ShoppingBag, Settings, LogOut, Info, LayoutDashboard, Globe, Bell } from "lucide-react";
+import { Leaf, ShoppingCart, Package, Search, MapPin, Menu, X, User, ChevronRight, ChevronDown, Home, ShoppingBag, Settings, LogOut, Info, LayoutDashboard, Globe, Bell, Truck, User2 } from "lucide-react";
 import { useTranslation } from "../context/LanguageContext";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import { jwtDecode } from "jwt-decode";
 
 function decodeJWT(token) {
   try {
@@ -114,6 +115,42 @@ function AccountDropdown() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  //Profile Image
+  const [profileImage, setProfileImage] = useState("");
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) return;
+        const decoded = jwtDecode(token);
+        const id = decoded.id || decoded._id;
+        const farmerUrl = `http://localhost:5000/api/auth/${id}`;
+
+        const res = await axios.get(farmerUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setProfileImage(
+          res.data?.img ||
+          res.data?.profileImage ||
+          res.data?.profileImageUrl ||
+          res.data?.farmer?.img ||
+          res.data?.farmer?.profileImage ||
+          res.data?.farmer?.profileImageUrl ||
+          "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+        );
+
+      } catch (error) {
+        console.log("Profile fetch error:", error);
+      }
+    };
+
+    fetchUser();
+
+  }, []);
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -122,10 +159,15 @@ function AccountDropdown() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-2xl transition-all"
       >
-        {/* MOBILE ICON */}
-        <div className="lg:hidden h-10 w-10 bg-emerald-100 flex items-center justify-center rounded-xl text-emerald-700">
-          <User size={20} />
-        </div>
+      <div className="lg:hidden h-12 w-12 rounded-full overflow-hidden  border border-black  flex items-center justify-center">
+  
+     {profileImage ? (
+       <img src={profileImage} alt="Profile" className="w-full h-full object-cover" onError={(e) => {   e.target.style.display = "https://media.istockphoto.com/id/512830984/photo/icon-man-on-a-white-background-3d-render.webp?a=1&b=1&s=612x612&w=0&k=20&c=r6Sx3TDUH8ERT43UvzRwFgo_VyD4WWjxNGrHCSos_68="; }}/>
+     ) : (
+       <User2 size={24} className="text-black" />
+      )}
+
+       </div>
 
         {/* DESKTOP */}
         <div className="hidden lg:block text-left">
@@ -182,22 +224,36 @@ function AccountDropdown() {
               {lang === "en" ? "HI" : "EN"}
             </span>
           </button>
-            {/* DASHBOARD */}
-            {isAuthenticated && userId && (
+                    {isAuthenticated && userId && (
+                         <>
+                            <a
+                             href={
+                              user?.role === "farmer"
+                              ? `/farmer-dashboard/${userId}` : `/user-dashboard/${userId}`
+                              }
+                             className="block"
+                          >
+                          <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
+                          <LayoutDashboard size={16} />
+                         {t.dashboard}
+                   </button>
+               </a>
+
+             {user?.role !== "farmer" && (
               <a
-                href={
-                  user?.role === "farmer"
-                    ? `/farmer-dashboard/${userId}`
-                    : `/user-dashboard/${userId}`
-                }
-                className="block"
-              >
-                <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
-                  <LayoutDashboard size={16} />
-                   {t.dashboard}
-                </button>
-              </a>
-            )}
+                href="/become-delivery-man"
+              className="block mt-2"
+               >
+              <button className="w-full flex items-center gap-3 px-3 py-2.5  rounded-xl hover:bg-slate-50 text-sm font-bold  transition-all text-slate-600">
+          
+             <Truck size={16} />
+
+             Become Delivery Man
+        </button>
+      </a>
+    )}
+  </>
+               )}
 
             {/* LOGOUT */}
             {isAuthenticated && (
@@ -230,14 +286,61 @@ function MobileMenu({ isOpen, setIsOpen }) {
     { name: t.shopcategories, icon: ShoppingBag, link: "/categories" },
     { name: t.myorders, icon: Package, link: "/orders" },
     ...(isAuthenticated && userId ? [{
-      name: user.role === "farmer" ? t.dashboard : t.dashboard,
-      icon: LayoutDashboard,
-      link: user.role === "farmer" ? `/farmer-dashboard/${userId}` : `/user-dashboard/${userId}`
-    }] : []),
+        name: t.dashboard,
+        icon: LayoutDashboard,
+        link: user?.role === "farmer" ? `/farmer-dashboard/${userId}` : `/user-dashboard/${userId}`,},
+      ...(user?.role !== "farmer" ? [{
+              name: "Become Delivery Man",
+              icon: Truck,
+              link: "/become-delivery-man",
+            },
+          ]
+        : []),
+    ]
+  : []),
+    
     { name: t.settings, icon: Settings, link: "/settings" },
     { name: t.aboutkisanmitra, icon: Info, link: "/about" },
   ];
 
+  //profile Image
+
+
+  const [profileImage, setProfileImage] = useState("");
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) return;
+        const decoded = jwtDecode(token);
+        const id = decoded.id || decoded._id;
+        const farmerUrl = `http://localhost:5000/api/auth/${id}`;
+
+        const res = await axios.get(farmerUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setProfileImage(
+          res.data?.img ||
+          res.data?.profileImage ||
+          res.data?.profileImageUrl ||
+          res.data?.farmer?.img ||
+          res.data?.farmer?.profileImage ||
+          res.data?.farmer?.profileImageUrl ||
+          "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+        );
+
+      } catch (error) {
+        console.log("Profile fetch error:", error);
+      }
+    };
+
+    fetchUser();
+
+  }, []);
   return (
     <>
       <div 
@@ -249,8 +352,12 @@ function MobileMenu({ isOpen, setIsOpen }) {
         
         <div className="bg-slate-900 text-white p-6 rounded-br-[2.5rem]">
           <div className="flex justify-between items-center mb-6">
-            <div className="h-12 w-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg">
-              <User size={24} />
+            <div className=" h-12 w-12 rounded-full overflow-hidden shadow-lg border border-white  flex items-center justify-center">
+            {profileImage ? (
+              <img src={profileImage} alt="Profile" className="w-full h-full object-cover" onError={(e) => {   e.target.style.display = "https://media.istockphoto.com/id/512830984/photo/icon-man-on-a-white-background-3d-render.webp?a=1&b=1&s=612x612&w=0&k=20&c=r6Sx3TDUH8ERT43UvzRwFgo_VyD4WWjxNGrHCSos_68="; }}/>
+            ) : (
+              <User2 size={24} className="text-white " />
+              )}
             </div>
             <button onClick={() => setIsOpen(false)} className="h-10 w-10 flex items-center justify-center bg-white/10 rounded-xl">
               <X size={24} />

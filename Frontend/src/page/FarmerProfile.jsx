@@ -31,7 +31,7 @@ export default function FarmerProfile() {
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
 
   const DEFAULT_FARM_IMAGE = "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1600";
-  const DEFAULT_AVATAR = "https://www.w3schools.com/howto/img_avatar.png";
+  const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -471,28 +471,22 @@ export default function FarmerProfile() {
 {selectedBlog && (
   <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4 backdrop-blur-sm animate-in fade-in duration-300">
     <div className="bg-white rounded-[2.5rem] max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative">
+      
+      {/* FIXED CLOSE BUTTON - Always on top */}
       <button 
         onClick={() => setSelectedBlog(null)}
-        className="absolute top-5 right-5 z-[110] bg-white/90 hover:bg-white p-3 rounded-full text-gray-900 shadow-xl border border-gray-100 transition-all hover:rotate-90 active:scale-90"
+        className="absolute top-5 right-5 z-[130] bg-white/90 hover:bg-white p-3 rounded-full text-gray-900 shadow-xl border border-gray-100 transition-all hover:rotate-90 active:scale-90"
         title="Close"
       >
         <X size={24} strokeWidth={2.5} />
       </button>
 
-      <div className="overflow-y-auto scrollbar-hide">
-        {/* Image Section */}
-        {selectedBlog.blogImageUrl && (
-          <div className="relative h-64 md:h-80 w-full flex-shrink-0">
-            <img 
-              src={selectedBlog.blogImageUrl} 
-              className="w-full h-full object-cover" 
-              alt={selectedBlog.title} 
-            />
-            {/* Dark overlay to make top-right button pop even more if image is bright */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent" />
-          </div>
-        )}
-
+      <div className="overflow-y-auto custom-scrollbar flex-1 flex flex-col">
+       {selectedBlog.blogImageUrl && (
+         <div className="relative w-full bg-black flex items-center justify-center flex-shrink-0">
+           <img src={selectedBlog.blogImageUrl} alt={selectedBlog.title} className="w-full max-h-[500px] object-contain"/>
+        </div>
+       )}
         <div className="p-8 md:p-12">
           {/* Date Tag */}
           <div className="flex items-center gap-2 mb-5">
@@ -514,6 +508,8 @@ export default function FarmerProfile() {
           <div className="text-gray-700 leading-relaxed text-[18px] whitespace-pre-line prose prose-emerald max-w-none">
             {selectedBlog.content}
           </div>
+
+          <div className="h-6" />
         </div>
       </div>
     </div>
