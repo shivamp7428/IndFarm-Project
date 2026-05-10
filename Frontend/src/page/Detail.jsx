@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { ShoppingCart, Heart, Minus, Plus, ChevronLeft, Star, Trash2, Send, MessageSquare, ChevronDown, ChevronUp, StarHalf, Ban } from "lucide-react";
+import { ShoppingCart, Heart, Minus, Plus, ChevronLeft, Star, Trash2, Send, MessageSquare, ChevronDown, ChevronUp, StarHalf, Ban, ChevronRight } from "lucide-react";
 import { useTranslation } from "../context/LanguageContext";
 import { jwtDecode } from "jwt-decode";
 import { toast, ToastContainer } from "react-toastify";
@@ -12,11 +12,9 @@ export default function Detail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { translations: t } = useTranslation();
-
   const [product, setProduct] = useState(null);
   const [allProducts, setAllProducts] = useState([]);
   const [qty, setQty] = useState(1);
-
   // Comment States
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
@@ -234,14 +232,62 @@ export default function Detail() {
             </div>
           </div>
 
-          <div className="flex gap-4 mt-10">
-            <button className="flex-1 bg-black text-white md:px-8 md:py-4 rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-200">
-              Buy Now
-            </button>
-            <button className="flex items-center justify-center gap-2 border-2 border-gray-900 px-8 py-4 rounded-2xl font-bold hover:bg-gray-900 hover:text-white transition-all">
-              <ShoppingCart size={20} className="hidden md:block"/> Add to Cart
-            </button>
-          </div>
+        <div className="flex flex-col sm:flex-row gap-4 mt-10 w-full">
+
+  {/* Buy Now Button */}
+  <button
+    onClick={() => {
+
+      const orderData = {
+        product,
+        quantity: qty,
+        farmer
+      };
+
+      if (loggedInUserId) {
+
+        navigate(`/order/${product._id}`, {
+          state: orderData
+        });
+
+      } else {
+
+        navigate("/auth", {
+          state: {
+            redirectTo: `/order/${product._id}`,
+            orderData
+          }
+        });
+
+      }
+    }}
+
+    className="group flex-1 relative overflow-hidden bg-black text-white px-6 md:px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-gray-300"
+  >
+
+    <div className="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+    <div className="relative flex items-center justify-center gap-3">
+      <span className="tracking-wide text-sm md:text-base">
+        Buy Now
+      </span>
+      <ChevronRight
+        size={18}
+        className="group-hover:translate-x-1 transition-transform duration-300"
+      />
+    </div>
+    </button>
+     <button className="group flex-1 border-2 border-gray-900 bg-white text-gray-900 px-6 md:px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:bg-gray-900 hover:text-white hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-gray-200" >
+    <div className="flex items-center justify-center gap-3">
+      <ShoppingCart
+        size={20}
+        className="group-hover:rotate-12 transition-transform duration-300"
+      />
+      <span className="tracking-wide text-sm md:text-base">
+        Add to Cart
+      </span>
+    </div>
+  </button>
+</div>
         </div>
       </div>
 

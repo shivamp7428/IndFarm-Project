@@ -11,15 +11,10 @@ UserRouter.post('/signup', upload.single('farmImage'), signup);
 UserRouter.post('/login', login);
 UserRouter.post('/send-otp', sendOTP);
 UserRouter.post('/verify-otp', verifyOTP);
-
 UserRouter.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-UserRouter.get('/google/callback', 
-  passport.authenticate('google', { failureRedirect: '/login', session: false }),
-  (req, res) => {
-
+UserRouter.get('/google/callback',  passport.authenticate('google', { failureRedirect: '/login', session: false }),
+ (req, res) => {
     const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    
     res.redirect(`http://localhost:3000/login-success?token=${token}`);
   }
 );

@@ -236,16 +236,13 @@ export const rejectDeliveryOrder = async(req,res)=>{
 export const pickupOrder = async(req,res)=>{
    try{
 
-      const order =
-      await Order.findById(req.params.orderId);
-
+      const order = await Order.findById(req.params.orderId);
       if(!order){
          return res.status(404).json({
             success:false,
             message:"Order not found"
          })
       }
-
       order.deliveryStatus = "picked_up";
 
       await order.save();
@@ -256,7 +253,6 @@ export const pickupOrder = async(req,res)=>{
       })
 
    }catch(error){
-
       res.status(500).json({
          success:false,
          message:error.message

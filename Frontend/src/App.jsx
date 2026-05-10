@@ -8,7 +8,6 @@ import Footer from "./components/Footer";
 import Detail from "./page/Detail";
 import ScrollToTop from "./components/ScrollToTop";
 import FarmerProfile from "./page/FarmerProfile";
-import OrdersPage from "./page/Orders";
 import CartPage from "./page/Cart";
 import NotificationsPage from "./page/Notification";
 import AboutPage from "./page/About";
@@ -25,11 +24,10 @@ import FarmerDashboard from "./page/FarmerDashboard";
 import UserDashboard from "./page/UserDashboard";
 import { AuthProvider } from "./context/AuthContext";   
 import Marketplace from "./page/MarketPlace";
-<<<<<<< HEAD
 import LoginSuccess from "./components/LoginSuccess";
-=======
 import DeliveryForm from "./page/DeliveryForm";
->>>>>>> 72ebd1e (Added Comment and Delivery Section)
+import Checkout from "./page/CheckOut";
+import MyOrders from "./page/MyOrders";
 
 function App() {
   return (
@@ -64,7 +62,7 @@ function App() {
           path="/orders" 
           element={
             <PrivateRoute>
-              <OrdersPage />
+              <MyOrders />
             </PrivateRoute>
           } 
         />
@@ -84,6 +82,14 @@ function App() {
             </PrivateRoute>
           } 
         />
+        <Route 
+          path="/order/:id" 
+          element={
+            <PrivateRoute>
+              <Checkout />
+            </PrivateRoute>
+          } 
+        />
 
         <Route 
           path="/farmer-dashboard/:id" 
@@ -95,7 +101,7 @@ function App() {
         />
 
         <Route 
-          path="/user-dashboard/:id" 
+          path="/user-delivery-dashboard/:id/:id" 
           element={
             <ProtectedRoute allowedRoles={["customer", "user"]}>
               <UserDashboard />

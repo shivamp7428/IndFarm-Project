@@ -7,13 +7,11 @@ import UserRouter from './routes/authRoutes.js';
 import dns from 'dns';
 import productRoutes from "./routes/productRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
-<<<<<<< HEAD
 import passport from 'passport';
 import './config/passport.js';
-=======
 import CommentRoute from './routes/CommentRoute.js'
 import DeliveryRoute from './routes/DeliveryRoute.js';
->>>>>>> 72ebd1e (Added Comment and Delivery Section)
+import orderRoute from './routes/orderRoute.js'
 
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
@@ -36,6 +34,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/comment",CommentRoute);
 app.use("/api/delivery",DeliveryRoute);
+app.use("/api/orders",orderRoute);
 
 
 const port = process.env.PORT || 5000;

@@ -1,57 +1,86 @@
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
-
    customer:{
       type:mongoose.Schema.Types.ObjectId,
       ref:"User",
       required:true
    },
-
    farmer:{
       type:mongoose.Schema.Types.ObjectId,
       ref:"User",
       required:true
    },
-
    deliveryPartner:{
       type:mongoose.Schema.Types.ObjectId,
       ref:"Delivery",
       default:null
    },
-
    products:[
       {
          product:{
             type:mongoose.Schema.Types.ObjectId,
-            ref:"Product"
+            ref:"Product",
+            required:true
          },
-
-         quantity:Number,
-
-         price:Number
+         productName:{
+            type:String,
+            required:true
+         },
+         productImage:{
+            type:String,
+            default:""
+         },
+         quantity:{
+            type:Number,
+            required:true
+         },
+         price:{
+            type:Number,
+            required:true
+         },
+         total:{
+            type:Number,
+            required:true
+         }
       }
    ],
-
    shippingAddress:{
-      address:String,
-      city:String,
-      pincode:String,
-      phone:String
+      fullName:{
+         type:String,
+         required:true
+      },
+      phone:{
+         type:String,
+         required:true
+      },
+      address:{
+         type:String,
+         required:true
+      },
+      city:{
+         type:String,
+         required:true
+      },
+      state:{
+         type:String,
+         required:true
+      },
+      pincode:{
+         type:String,
+         required:true
+      }
    },
-
    paymentMethod:{
       type:String,
       enum:["cod","online"],
       default:"cod"
    },
-
    paymentStatus:{
       type:String,
       enum:["pending","paid","failed"],
       default:"pending"
    },
-
    orderStatus:{
       type:String,
       enum:[
@@ -59,12 +88,12 @@ const orderSchema = new mongoose.Schema({
          "accepted",
          "packed",
          "shipped",
+         "out_for_delivery",
          "delivered",
          "cancelled"
       ],
       default:"placed"
    },
-
    deliveryStatus:{
       type:String,
       enum:[
@@ -76,8 +105,7 @@ const orderSchema = new mongoose.Schema({
       ],
       default:"pending"
    },
-
-   totalAmount:{
+   totalProductPrice:{
       type:Number,
       required:true
    },
@@ -86,15 +114,24 @@ const orderSchema = new mongoose.Schema({
       type:Number,
       default:0
    },
-
-   deliveryOTP:{
-      type:String
+   totalAmount:{
+      type:Number,
+      required:true
    },
+   deliveryOTP:{
+      type:String,
+      default:null
+   },
+   deliveredAt:{
+      type:Date,
+      default:null
+   },
+   cancelledAt:{
+      type:Date,
+      default:null
+   }
 
-   deliveredAt:Date
-
-},{timestamps:true})
+},{timestamps:true});
 
 const Order = mongoose.models.Order || mongoose.model("Order",orderSchema);
-
 export default Order;
