@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-
+import { useState } from "react";
 import { Navbar } from "./components/Navbar";
 import { AIChatbot } from "./components/AIChatbot";
 import AuthPage from "./components/AuthPage";
@@ -8,7 +8,6 @@ import Footer from "./components/Footer";
 import Detail from "./page/Detail";
 import ScrollToTop from "./components/ScrollToTop";
 import FarmerProfile from "./page/FarmerProfile";
-import OrdersPage from "./page/Orders";
 import CartPage from "./page/Cart";
 import NotificationsPage from "./page/Notification";
 import AboutPage from "./page/About";
@@ -26,8 +25,14 @@ import UserDashboard from "./page/UserDashboard";
 import { AuthProvider } from "./context/AuthContext";   
 import Marketplace from "./page/MarketPlace";
 import LoginSuccess from "./components/LoginSuccess";
+import DeliveryForm from "./page/DeliveryForm";
+import Checkout from "./page/CheckOut";
+import MyOrders from "./page/MyOrders";
+import FarmerOrder from "./page/FarmerOrders";
+import AssignDelivery from "./page/AssignDelivery";
 
 function App() {
+  const [open, setOpen] = useState(false);
   return (
     <AuthProvider>   
       <ScrollToTop />
@@ -42,6 +47,11 @@ function App() {
         <Route path="/faqs" element={<FAQPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/refund" element={<RefundPage />} />
+        <Route path="/del" element={<AssignDelivery 
+         isOpen={open}
+         onClose={()=>setOpen(false)}
+         />} />
+
         <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/detail/:id" element={<Detail />} />
         <Route path="/farmerProfile/:id" element={<FarmerProfile />} />
@@ -60,7 +70,7 @@ function App() {
           path="/orders" 
           element={
             <PrivateRoute>
-              <OrdersPage />
+              <MyOrders />
             </PrivateRoute>
           } 
         />
@@ -80,6 +90,14 @@ function App() {
             </PrivateRoute>
           } 
         />
+        <Route 
+          path="/order/:id" 
+          element={
+            <PrivateRoute>
+              <Checkout />
+            </PrivateRoute>
+          } 
+        />
 
         <Route 
           path="/farmer-dashboard/:id" 
@@ -89,12 +107,28 @@ function App() {
             </ProtectedRoute>
           } 
         />
+        <Route 
+          path="/farmer/orders" 
+          element={
+            <ProtectedRoute allowedRoles={["farmer"]}>
+              <FarmerOrder />
+            </ProtectedRoute>
+          } 
+        />
 
         <Route 
-          path="/user-dashboard/:id" 
+          path="/user-delivery-dashboard/:id/:id" 
           element={
             <ProtectedRoute allowedRoles={["customer", "user"]}>
               <UserDashboard />
+            </ProtectedRoute>
+          } 
+        />
+         <Route 
+          path="/become-delivery-man/:id" 
+          element={
+            <ProtectedRoute allowedRoles={["customer", "user"]}>
+              <DeliveryForm />
             </ProtectedRoute>
           } 
         />

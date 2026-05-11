@@ -340,7 +340,6 @@ export const deleteAccount = async (req, res) => {
 export const getFarmerById = async (req, res) => {
   try {
     const { id } = req.params;
-
     const farmer = await User.findById(id).select("-password -otp -otpExpiry");
 
     if (!farmer) {
