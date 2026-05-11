@@ -9,6 +9,7 @@ import productRoutes from "./routes/productRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
 import passport from 'passport';
 import './config/passport.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
@@ -29,7 +30,7 @@ app.use(morgan("dev"));
 app.use("/api/auth", UserRouter);
 app.use("/api/products", productRoutes);
 app.use("/api/blogs", blogRoutes);
-
+app.use('/api/payment', paymentRoutes);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
