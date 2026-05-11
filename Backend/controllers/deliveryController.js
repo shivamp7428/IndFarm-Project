@@ -7,36 +7,70 @@ import Order from "../models/Order.js";
 export const createDeliveryPartner = async (req, res) => {
 
    try {
+      const { phone, aadhaarNumber, vehicleType, vehicleNumber, accountHolderName, accountNumber, ifscCode, latitude, longitude } = req.body;
 
-      const {phone, aadhaarNumber,  vehicleType,  vehicleNumber,  accountHolderName,  accountNumber,  ifscCode} = req.body;
-
-      if ( !req.files?.aadhaarImage || !req.files?.bankImage) {
-         return res.status(400).json({  success: false,  message: "All images are required"});
+      if (!req.files?.aadhaarImage || !req.files?.bankImage) {
+         return res.status(400).json({
+            success: false,
+            message: "All images are required"
+         });
       }
 
-      const aadhaarImage =
-      req.files.aadhaarImage[0].path;
+      const aadhaarImage = req.files.aadhaarImage[0].path;
+      const bankImage = req.files.bankImage[0].path;
 
-      const bankImage =
-      req.files.bankImage[0].path;
-
-      const existing =
-      await Delivery.findOne({
+      const existing = await Delivery.findOne({
          userId: req.user.id
       });
 
       if (existing) {
-         return res.status(400).json({ success: false, message: "Delivery partner already exists"});
+         return res.status(400).json({
+            success: false,
+            message: "Delivery partner already exists"
+         });
       }
-      if ( !phone || !aadhaarNumber || !vehicleType || !vehicleNumber || !accountHolderName || !accountNumber || !ifscCode) {
-       return res.status(400).json({success: false, message:"Please fill all fields"});
-   }
-      const deliveryPartner = await Delivery.create({userId: req.user.id,phone,phoneVerified: true,aadhaarNumber, aadhaarImage, vehicleType, vehicleNumber, accountHolderName,accountNumber,ifscCode,bankImage,status: "pending",isActive: true, isAvailable: false});
-      res.status(201).json({success: true,message:"Delivery partner request submitted successfully", deliveryPartner});
+
+      if (!phone || !aadhaarNumber || !vehicleType || !vehicleNumber || !accountHolderName || !accountNumber || !ifscCode) {
+         return res.status(400).json({
+            success: false,
+            message: "Please fill all fields"
+         });
+      }
+
+      const deliveryPartner = await Delivery.create({
+         userId: req.user.id,
+         phone,
+         phoneVerified: true,
+         aadhaarNumber,
+         aadhaarImage,
+         vehicleType,
+         vehicleNumber,
+         accountHolderName,
+         accountNumber,
+         ifscCode,
+         bankImage,
+         status: "pending",
+         isActive: true,
+         isAvailable: false,
+
+         location: {
+            latitude: latitude ? Number(latitude) : null,
+            longitude: longitude ? Number(longitude) : null
+         }
+      });
+
+      res.status(201).json({
+         success: true,
+         message: "Delivery partner request submitted successfully",
+         deliveryPartner
+      });
 
    } catch (error) {
       console.log(error);
-      res.status(500).json({success: false,message: error.message});
+      res.status(500).json({
+         success: false,
+         message: error.message
+      });
    }
 };
 
@@ -430,3 +464,62 @@ export const getCompletedDeliveries = async(req,res)=>{
 
    }
 }
+
+export const getAllDeliveryPartners = async (req, res) => {
+   try {
+
+      const { latitude, longitude } = req.query;
+
+      const partners = await Delivery.find({
+         isActive: true,
+         isAvailable: true,
+         status: "approved"
+      }).populate("userId", "fullName email img phone");
+
+      const calculateDistance = (lat1, lon1, lat2, lon2) => {
+         const toRad = (value) => (value * Math.PI) / 180;
+
+         const R = 6371; // km
+         const dLat = toRad(lat2 - lat1);
+         const dLon = toRad(lon2 - lon1);
+
+         const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(toRad(lat1)) *
+            Math.cos(toRad(lat2)) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+
+         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+         return R * c;
+      };
+
+      const enriched = partners.map(p => {
+         const distance = calculateDistance(
+            latitude,
+            longitude,
+            p.latitude,
+            p.longitude
+         );
+
+         return {
+            ...p._doc,
+            distance: Number(distance.toFixed(2))
+         };
+      });
+
+      enriched.sort((a, b) => a.distance - b.distance);
+
+      res.status(200).json({
+         success: true,
+         partners: enriched
+      });
+
+   } catch (error) {
+      res.status(500).json({
+         success: false,
+         message: error.message
+      });
+   }
+};

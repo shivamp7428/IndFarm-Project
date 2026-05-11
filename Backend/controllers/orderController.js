@@ -5,25 +5,40 @@ import Delivery from "../models/DeliveryPartner.js";
 
 export const createOrder = async (req, res) => {
    try {
-      const { farmer, products, shippingAddress, paymentMethod} = req.body;
+
+      const { farmer, products, shippingAddress, paymentMethod } = req.body;
+
       if (!products || products.length === 0) {
          return res.status(400).json({
             success: false,
             message: "No products selected"
          });
       }
+
       let totalProductPrice = 0;
       const formattedProducts = [];
+
       for (const item of products) {
-         const productData =  await Product.findById(item.product);
+
+         const productData = await Product.findById(item.product);
+
          if (!productData) {
             return res.status(404).json({
                success: false,
                message: "Product not found"
             });
          }
-         const total =  productData.price * item.quantity;
+
+         if (productData.stock < item.quantity) {
+            return res.status(400).json({
+               success: false,
+               message: `${productData.name} is out of stock`
+            });
+         }
+
+         const total = productData.price * item.quantity;
          totalProductPrice += total;
+
          formattedProducts.push({
             product: productData._id,
             productName: productData.name,
@@ -33,50 +48,77 @@ export const createOrder = async (req, res) => {
             total
          });
       }
+
       let deliveryCharge = 0;
+
       if (totalProductPrice < 100) {
          deliveryCharge = 30;
-      }
-
+      } 
       else if (totalProductPrice < 300) {
          deliveryCharge = 15;
       }
 
       const totalAmount = totalProductPrice + deliveryCharge;
       const otp = Math.floor(1000 + Math.random() * 9000).toString();
+      const latitude = shippingAddress?.latitude || null;
+      const longitude = shippingAddress?.longitude || null;
+
       const order = await Order.create({
-            customer: req.user.id,
-            farmer,
-            products: formattedProducts,
-            shippingAddress,
-            paymentMethod,
-            totalProductPrice,
-            deliveryCharge,
-            totalAmount,
-            deliveryOTP: otp
-         });
+         customer: req.user.id,
+         farmer,
+         products: formattedProducts,
+
+         shippingAddress: {
+            ...shippingAddress,
+            latitude,
+            longitude
+         },
+
+         paymentMethod,
+
+         totalProductPrice,
+         deliveryCharge,
+         totalAmount,
+         deliveryOTP: otp,
+         orderStatus: "placed",
+         deliveryStatus: "pending",
+         deliveryPartner: null
+      });
+
+      for (const item of products) {
+         await Product.findByIdAndUpdate(
+            item.product,
+            {
+               $inc: { stock: -item.quantity }
+            }
+         );
+      }
 
       res.status(201).json({
          success: true,
          message: "Order placed successfully",
          order
       });
-   }
-   catch (error) {
+
+   } catch (error) {
+
       console.log(error);
+
       res.status(500).json({
          success: false,
          message: error.message
-
       });
+
    }
 };
 
 export const getUserOrders = async (req, res) => {
+
    try {
+
       const { userId } = req.params;
 
-      const orders = await Order.find({
+      let orders = await Order.find({
          customer: userId
       })
       .populate({
@@ -88,7 +130,21 @@ export const getUserOrders = async (req, res) => {
          select: "fullName phone vehicleType vehicleNumber",
          options: { strictPopulate: false }
       })
-      .sort({ createdAt: -1 });
+      .sort({ updatedAt: -1 });
+
+      orders = orders.sort((a, b) => {
+
+         if (a.orderStatus === "cancelled" && b.orderStatus !== "cancelled") {
+            return 1;
+         }
+
+         if (a.orderStatus !== "cancelled" && b.orderStatus === "cancelled") {
+            return -1;
+         }
+
+         return new Date(b.updatedAt) - new Date(a.updatedAt);
+
+      });
 
       return res.status(200).json({
          success: true,
@@ -96,12 +152,14 @@ export const getUserOrders = async (req, res) => {
       });
 
    } catch (error) {
+
       console.log("ORDER FETCH ERROR:", error);
 
       return res.status(500).json({
          success: false,
          message: error.message
       });
+
    }
 };
 // GET SINGLE ORDER
@@ -131,28 +189,42 @@ export const getSingleOrder = async (req, res) => {
       });
    }
 };
+
 // GET FARMER ORDERS
 export const getFarmerOrders = async (req, res) => {
-
    try {
-      const orders =
-         await Order.find({
-            farmer: req.params.farmerId
-         })
-            .populate("customer", "name email")
-            .populate("deliveryPartner")
-            .sort({ createdAt: -1 });
+
+      let orders = await Order.find({
+         farmer: req.params.farmerId
+      })
+      .populate("customer", "name email")
+      .populate("deliveryPartner")
+      .sort({ updatedAt: -1 });
+
+      orders = orders.sort((a, b) => {
+         if (a.orderStatus === "cancelled" && b.orderStatus !== "cancelled") {
+            return 1;
+         }
+
+         if (a.orderStatus !== "cancelled" && b.orderStatus === "cancelled") {
+            return -1;
+         }
+
+         return new Date(b.updatedAt) - new Date(a.updatedAt);
+      });
 
       res.status(200).json({
          success: true,
          orders
       });
-   }
-   catch (error) {
+
+   } catch (error) {
+
       res.status(500).json({
          success: false,
          message: error.message
       });
+
    }
 };
 // ACCEPT ORDER

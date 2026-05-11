@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -57,132 +57,156 @@ const CustomInput = ({
   );
 };
 
-// ======================================================
-// MAIN COMPONENT
-// ======================================================
-
 const DeliveryForm = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [isOpen, setIsOpen] = useState(false);
+const [loading, setLoading] = useState(false);
+const [errors, setErrors] = useState({});
+const [isOpen, setIsOpen] = useState(false);
 
-  // ======================================================
-  // FORM STATES
-  // ======================================================
+const [phone, setPhone] = useState("");
+const [aadhaarNumber, setAadhaarNumber] = useState("");
+const [aadhaarImage, setAadhaarImage] = useState(null);
+const [vehicleType, setVehicleType] = useState("");
+const [vehicleNumber, setVehicleNumber] = useState("");
+const [accountHolderName, setAccountHolderName] = useState("");
+const [accountNumber, setAccountNumber] = useState("");
+const [ifscCode, setIfscCode] = useState("");
+const [bankImage, setBankImage] = useState(null);
 
-  const [phone, setPhone] = useState("");
-  const [aadhaarNumber, setAadhaarNumber] = useState("");
-  const [aadhaarImage, setAadhaarImage] = useState(null);
-  const [vehicleType, setVehicleType] = useState("");
-  const [vehicleNumber, setVehicleNumber] = useState("");
-  const [accountHolderName, setAccountHolderName] = useState("");
-  const [accountNumber, setAccountNumber] = useState("");
-  const [ifscCode, setIfscCode] = useState("");
-  const [bankImage, setBankImage] = useState(null);
 
-  // ======================================================
-  // INPUT HANDLERS
-  // ======================================================
+const detectLocation = () => {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation not supported");
+      return reject();
+    }
 
-  const handlePhone = (e) => {
-    const value = e.target.value.replace(/[^0-9]/g, "");
-    if (value.length <= 10) setPhone(value);
-  };
+    const toastId = toast.loading("Detecting location...");
 
-  const handleAadhaar = (e) => {
-    const value = e.target.value.replace(/[^0-9]/g, "");
-    if (value.length <= 12) setAadhaarNumber(value);
-  };
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        toast.success("Location detected", { id: toastId });
 
-  const handleVehicleNumber = (e) => {
-    const value = e.target.value.toUpperCase().replace(/[^A-Z0-9\s]/g, "");
-    if (value.length <= 15) setVehicleNumber(value);
-  };
+        resolve({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      },
+      (error) => {
+        toast.error("Location access denied", { id: toastId });
+        reject(error);
+      }
+    );
+  });
+};
+useEffect(() => {
+  detectLocation();
+}, []);
 
-  const handleAccountNumber = (e) => {
-    const value = e.target.value.replace(/[^0-9]/g, "");
-    if (value.length <= 18) setAccountNumber(value);
-  };
+const handlePhone = (e) => {
+  const value = e.target.value.replace(/[^0-9]/g, "");
+  if (value.length <= 10) setPhone(value);
+};
 
-  const handleIFSC = (e) => {
-    const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
-    if (value.length <= 11) setIfscCode(value);
-  };
+const handleAadhaar = (e) => {
+  const value = e.target.value.replace(/[^0-9]/g, "");
+  if (value.length <= 12) setAadhaarNumber(value);
+};
 
-  const handleName = (e) => {
-    const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
-    if (value.length <= 50) setAccountHolderName(value);
-  };
+const handleVehicleNumber = (e) => {
+  const value = e.target.value.toUpperCase().replace(/[^A-Z0-9\s]/g, "");
+  if (value.length <= 15) setVehicleNumber(value);
+};
 
-  // ======================================================
-  // VALIDATION
-  // ======================================================
+const handleAccountNumber = (e) => {
+  const value = e.target.value.replace(/[^0-9]/g, "");
+  if (value.length <= 18) setAccountNumber(value);
+};
 
-  const validate = () => {
-    let newErrors = {};
-    if (phone.length !== 10) newErrors.phone = "Phone number must be 10 digits";
-    if (aadhaarNumber.length !== 12) newErrors.aadhaar = "Aadhaar must be 12 digits";
-    if (!vehicleType) newErrors.vehicleType = "Select vehicle type";
-    if (vehicleNumber.length < 5) newErrors.vehicleNumber = "Invalid vehicle number";
-    if (accountHolderName.trim().length < 3) newErrors.name = "Name must be at least 3 characters";
-    if (accountNumber.length < 9 || accountNumber.length > 18) newErrors.acc = "Account number must be 9-18 digits";
-    if (ifscCode.length !== 11) newErrors.ifsc = "IFSC must be 11 characters";
-    if (!aadhaarImage) newErrors.img1 = "Aadhaar image required";
-    if (!bankImage) newErrors.img2 = "Bank image required";
+const handleIFSC = (e) => {
+  const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (value.length <= 11) setIfscCode(value);
+};
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+const handleName = (e) => {
+  const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+  if (value.length <= 50) setAccountHolderName(value);
+};
 
-  // ======================================================
-  // SUBMIT
-  // ======================================================
+const validate = () => {
+  let newErrors = {};
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) {
-      toast.error("Please fill all fields correctly");
+  if (phone.length !== 10) newErrors.phone = "Phone number must be 10 digits";
+  if (aadhaarNumber.length !== 12) newErrors.aadhaar = "Aadhaar must be 12 digits";
+  if (!vehicleType) newErrors.vehicleType = "Select vehicle type";
+  if (vehicleNumber.length < 5) newErrors.vehicleNumber = "Invalid vehicle number";
+  if (accountHolderName.trim().length < 3) newErrors.name = "Name must be at least 3 characters";
+  if (accountNumber.length < 9 || accountNumber.length > 18) newErrors.acc = "Account number must be 9-18 digits";
+  if (ifscCode.length !== 11) newErrors.ifsc = "IFSC must be 11 characters";
+  if (!aadhaarImage) newErrors.img1 = "Aadhaar image required";
+  if (!bankImage) newErrors.img2 = "Bank image required";
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!validate()) {
+    toast.error("Please fill all fields correctly");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const token = localStorage.getItem("token");
+    let location = { lat: null, lng: null };
+
+    try {
+      location = await detectLocation();
+    } catch (err) {
+      toast.error("Location required for delivery");
+      setLoading(false);
       return;
     }
 
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-      const formData = new FormData();
-      formData.append("phone", phone);
-      formData.append("aadhaarNumber", aadhaarNumber);
-      formData.append("aadhaarImage", aadhaarImage);
-      formData.append("vehicleType", vehicleType);
-      formData.append("vehicleNumber", vehicleNumber);
-      formData.append("accountHolderName", accountHolderName);
-      formData.append("accountNumber", accountNumber);
-      formData.append("ifscCode", ifscCode);
-      formData.append("bankImage", bankImage);
+    const formData = new FormData();
 
-      const { data } = await axios.post(
-        "http://localhost:5000/api/delivery/register",
-        formData,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    formData.append("phone", phone);
+    formData.append("aadhaarNumber", aadhaarNumber);
+    formData.append("aadhaarImage", aadhaarImage);
+    formData.append("vehicleType", vehicleType);
+    formData.append("vehicleNumber", vehicleNumber);
+    formData.append("accountHolderName", accountHolderName);
+    formData.append("accountNumber", accountNumber);
+    formData.append("ifscCode", ifscCode);
+    formData.append("bankImage", bankImage);
 
-      if (data.success) {
-        toast.success("Registration Successful 🎉");
-        navigate("/delivery-dashboard");
+    formData.append("latitude", location.lat);
+    formData.append("longitude", location.lng);
+
+    const { data } = await axios.post(
+      "http://localhost:5000/api/delivery/register",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
-  };
+    );
 
+    if (data.success) {
+      toast.success("Registration Successful 🎉");
+      navigate("/");
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4">
       <motion.div

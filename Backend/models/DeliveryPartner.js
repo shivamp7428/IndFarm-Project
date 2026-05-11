@@ -40,7 +40,16 @@ const deliveryPartnerSchema = new mongoose.Schema({
       type:Boolean,
       default:false
    },
-
+  location: {
+    latitude: {
+      type: Number,
+      default: null
+    },
+    longitude: {
+      type: Number,
+      default: null
+   }
+ },
    vehicleType:{
       type:String,
       required:true,
@@ -66,6 +75,7 @@ const deliveryPartnerSchema = new mongoose.Schema({
       trim:true
    },
 
+   
    ifscCode:{
       type:String,
       required:true,

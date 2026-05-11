@@ -213,11 +213,9 @@ useEffect(()=>{
         </div>
       </button>
 
-      {/* DROPDOWN */}
       {isOpen && (
         <div className="absolute top-[calc(100%+8px)] right-0 w-64 bg-white border border-slate-100 rounded-3xl shadow-2xl p-4 z-[110]">
           
-          {/* LOGIN BUTTON */}
           {!isAuthenticated ? (
             <div className="text-center border-b border-slate-50 pb-4 mb-4">
               <a href="/auth" className="block w-full">
@@ -274,7 +272,6 @@ useEffect(()=>{
       </a>
    )}
 
-   {/* USER DELIVERY SECTION */}
 
    {
       user?.role !== "farmer" && (
@@ -318,6 +315,14 @@ useEffect(()=>{
 
 </>
 )}
+{isAuthenticated && (
+  <a href={user?.role === "farmer" ? "/farmer/orders" : "/orders"} className="block lg:hidden">
+    <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
+      <Package size={16} />
+      {user?.role === "farmer" ? "Sales & Orders" : "My Orders"}
+    </button>
+  </a>
+)}
             {/* LOGOUT */}
             {isAuthenticated && (
               <button
@@ -347,7 +352,15 @@ function MobileMenu({ isOpen, setIsOpen }) {
   const navItems = [
     { name: t.home, icon: Home, link: "/" },
     { name: t.shopcategories, icon: ShoppingBag, link: "/categories" },
-    { name: t.myorders, icon: Package, link: "/orders" },
+    ...(isAuthenticated && userId ? [
+  {
+    name: user?.role === "farmer" ? "Sales Orders" : t.myorders,
+    icon: Package,
+    link: user?.role === "farmer" 
+      ? "/farmer/orders" 
+      : "/orders",
+  },
+] : []),
     ...(isAuthenticated && userId ? [{
         name: t.dashboard,
         icon: LayoutDashboard,
@@ -576,12 +589,29 @@ export function Navbar({ cartCount = 0 }) {
               {lang === "en" ? "हिन्दी" : "ENG"}
             </button>
 
-            <a href="/orders" className="hidden lg:block">
-              <button className="flex flex-col items-start px-2 py-1 hover:bg-slate-50 rounded-xl transition-all text-left">
-                <span className="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">{t.return}</span>
-                <span className="text-sm font-black text-slate-800 tracking-tight">& {t.order}</span>
-              </button>
-            </a>
+            {user?.role === "farmer" ? (
+  <a href="/farmer/orders" className="hidden lg:block">
+    <button className="flex flex-col items-start px-2 py-1 hover:bg-slate-50 rounded-xl transition-all text-left">
+      <span className="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">
+        Sales
+      </span>
+      <span className="text-sm font-black text-slate-800 tracking-tight">
+        & Orders
+      </span>
+    </button>
+  </a>
+) : (
+  <a href="/orders" className="hidden lg:block">
+    <button className="flex flex-col items-start px-2 py-1 hover:bg-slate-50 rounded-xl transition-all text-left">
+      <span className="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">
+        {t.return}
+      </span>
+      <span className="text-sm font-black text-slate-800 tracking-tight">
+        & {t.order}
+      </span>
+    </button>
+  </a>
+)}
 
             <AccountDropdown/>
 

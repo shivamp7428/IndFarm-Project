@@ -1,5 +1,5 @@
 import express from 'express';
-import { acceptDeliveryOrder, createDeliveryPartner, deliverOrder, getAssignedOrders, getCompletedDeliveries, getDeliveryDashboard, getDeliveryEarnings, getDeliveryPartnerStatus, leaveDeliveryPartner, pickupOrder, rejectDeliveryOrder, toggleAvailability, updateDeliveryLocation } from './../controllers/deliveryController.js';
+import { acceptDeliveryOrder, createDeliveryPartner, deliverOrder, getAllDeliveryPartners, getAssignedOrders, getCompletedDeliveries, getDeliveryDashboard, getDeliveryEarnings, getDeliveryPartnerStatus, leaveDeliveryPartner, pickupOrder, rejectDeliveryOrder, toggleAvailability, updateDeliveryLocation } from './../controllers/deliveryController.js';
 import { upload } from "../config/cloudinary.js";
 import auth from './../middlewares/auth.js';
 
@@ -30,5 +30,5 @@ router.get("/earnings/:deliveryId", getDeliveryEarnings)
 router.get("/history/:deliveryId", getCompletedDeliveries)
 
 router.get("/dashboard/:deliveryId", getDeliveryDashboard)
-
+router.get("/all", auth, getAllDeliveryPartners)
 export default router;

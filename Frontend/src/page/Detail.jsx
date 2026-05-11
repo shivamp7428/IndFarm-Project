@@ -234,9 +234,14 @@ export default function Detail() {
 
         <div className="flex flex-col sm:flex-row gap-4 mt-10 w-full">
 
+ <div className="flex flex-col sm:flex-row gap-4 mt-10 w-full">
+
   {/* Buy Now Button */}
   <button
+    disabled={isOwnProfile}
     onClick={() => {
+
+      if (isOwnProfile) return;
 
       const orderData = {
         product,
@@ -261,32 +266,56 @@ export default function Detail() {
 
       }
     }}
-
-    className="group flex-1 relative overflow-hidden bg-black text-white px-6 md:px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-gray-300"
+    className={`group flex-1 relative overflow-hidden px-6 md:px-8 py-4 rounded-2xl font-bold transition-all duration-300 shadow-xl
+      ${
+        isOwnProfile
+          ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
+          : "bg-black text-white hover:scale-[1.02] active:scale-[0.98] shadow-gray-300"
+      }`}
   >
 
-    <div className="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+    {!isOwnProfile && (
+      <div className="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+    )}
+
     <div className="relative flex items-center justify-center gap-3">
       <span className="tracking-wide text-sm md:text-base">
-        Buy Now
+        {isOwnProfile ? "Own Product" : "Buy Now"}
       </span>
-      <ChevronRight
-        size={18}
-        className="group-hover:translate-x-1 transition-transform duration-300"
-      />
+
+      {!isOwnProfile && (
+        <ChevronRight
+          size={18}
+          className="group-hover:translate-x-1 transition-transform duration-300"
+        />
+      )}
     </div>
-    </button>
-     <button className="group flex-1 border-2 border-gray-900 bg-white text-gray-900 px-6 md:px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:bg-gray-900 hover:text-white hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-gray-200" >
+  </button>
+
+  {/* Add To Cart */}
+  <button
+    disabled={isOwnProfile}
+    className={`group flex-1 px-6 md:px-8 py-4 rounded-2xl font-bold transition-all duration-300
+      ${
+        isOwnProfile
+          ? "bg-gray-200 text-gray-500 border-2 border-gray-200 cursor-not-allowed"
+          : "border-2 border-gray-900 bg-white text-gray-900 hover:bg-gray-900 hover:text-white hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-gray-200"
+      }`}
+  >
     <div className="flex items-center justify-center gap-3">
       <ShoppingCart
         size={20}
-        className="group-hover:rotate-12 transition-transform duration-300"
+        className={!isOwnProfile ? "group-hover:rotate-12 transition-transform duration-300" : ""}
       />
+
       <span className="tracking-wide text-sm md:text-base">
-        Add to Cart
+        {isOwnProfile ? "Unavailable" : "Add to Cart"}
       </span>
     </div>
   </button>
+
+</div>
+
 </div>
         </div>
       </div>
@@ -396,7 +425,7 @@ export default function Detail() {
           {allProducts.filter((p) => p._id !== product._id).slice(0, 10).map((item) => (
             <Link key={item._id} to={`/detail/${item._id}`} className="bg-white flex flex-col h-[320px] p-4 hover:shadow-sm transition-shadow duration-200 group border border-transparent hover:border-gray-100">
               <div className="h-[40px] mb-3 overflow-hidden">
-                <h3 className="text-sm font-bold text-gray-900 line-clamp-2 leading-tight group-hover:text-emerald-700 transition-colors">{item.name}</h3>
+                <h3 className="text-sm font-bold text-gray-900 line-clamp-2 leading-tight  transition-colors">{item.name}</h3>
               </div>
               <div className="relative w-full h-[250px] bg-white flex items-center justify-center overflow-hidden ">
                 <img src={item.productImageUrl} alt={item.name} className="w-full h-full object-cover duration-300" />

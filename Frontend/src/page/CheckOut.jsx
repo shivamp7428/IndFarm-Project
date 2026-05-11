@@ -33,14 +33,16 @@ const Checkout = () => {
 
   const [paymentMethod, setPaymentMethod] = useState("cod");
 
-  const [shippingAddress, setShippingAddress] = useState({
-    fullName: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    pincode: "",
-  });
+ const [shippingAddress, setShippingAddress] = useState({
+  fullName: "",
+  phone: "",
+  address: "",
+  city: "",
+  state: "",
+  pincode: "",
+  latitude: null,
+  longitude: null,
+});
 
 
   const subtotal = product?.price * quantity;
@@ -63,29 +65,60 @@ const Checkout = () => {
 
 
   const useCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      return toast.error("Geolocation not supported");
-    }
-    const toastId = toast.loading("Detecting location...");
-    navigator.geolocation.getCurrentPosition(
-      () => {
+
+  if (!navigator.geolocation) {
+    return toast.error("Geolocation not supported");
+  }
+
+  const toastId = toast.loading("Detecting location...");
+
+  navigator.geolocation.getCurrentPosition(
+
+    async (position) => {
+
+      try {
+
+        const { latitude, longitude } = position.coords;
+
+        const response = await axios.get(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+        );
+
+        const data = response.data;
+
+        const fullAddress = data.display_name || "";
+
         toast.success("Location detected", {
           id: toastId,
         });
 
         setShippingAddress((prev) => ({
           ...prev,
-          city: "Detected City",
-          state: "Detected State",
+          address: fullAddress,
+          latitude,  
+          longitude,
         }));
-      },
-      () => {
-        toast.error("Failed to fetch location", {
+
+      } catch (error) {
+
+        toast.error("Failed to fetch address", {
           id: toastId,
         });
+
       }
-    );
-  };
+
+    },
+
+    () => {
+
+      toast.error("Failed to fetch location", {
+        id: toastId,
+      });
+
+    }
+
+  );
+};
 
   const handlePlaceOrder = async () => {
     const token = localStorage.getItem("token");
@@ -95,14 +128,13 @@ const Checkout = () => {
     setLoading(true);
     try {
       const payload = {
-        farmer: farmer._id,
-        products: [
+          farmer: farmer._id,
+          products: [
           {
             product: product._id,
             quantity,
-          },
-        ],
-
+            },
+         ],
         shippingAddress,
         paymentMethod,
       };
@@ -136,7 +168,7 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
       <Toaster position="top-center" />
-      <div className="sticky top-0 z-50 bg-white border-b border-slate-200">
+      <div className="sticky top-0 z-10 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 py-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div
@@ -212,13 +244,7 @@ const Checkout = () => {
                     <MapPin className="text-emerald-500" />
                     Shipping Details
                   </h2>
-                  <button
-                    onClick={useCurrentLocation}
-                    className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-full text-xs font-black uppercase hover:bg-emerald-100 transition-all"
-                  >
-                    <Navigation size={14} />
-                    Current Location
-                  </button>
+                  
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <input
@@ -237,14 +263,27 @@ const Checkout = () => {
                     onChange={handleChange}
                     className="bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-emerald-500"
                   />
-                  <textarea
-                    rows="4"
-                    name="address"
-                    placeholder="Full Address"
-                    value={shippingAddress.address}
-                    onChange={handleChange}
-                    className="md:col-span-2 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 outline-none resize-none focus:ring-2 focus:ring-emerald-500"
-                  />
+                  <div className="md:col-span-2 relative">
+
+                <textarea
+                 rows="4"
+                 name="address"
+                 placeholder="Full Address"
+                 value={shippingAddress.address}
+                 onChange={handleChange}
+                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 pr-36 outline-none resize-none focus:ring-2 focus:ring-emerald-500"
+                />
+
+             <button
+               type="button"
+               onClick={useCurrentLocation}
+               className="absolute top-4 right-4 flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-emerald-100 transition-all"
+              >
+              <Navigation size={14} />
+               Current
+             </button>
+
+            </div>
                   <input
                     type="text"
                     name="city"
@@ -276,7 +315,7 @@ const Checkout = () => {
 
                   <button
                     onClick={() => setStep(2)}
-                    className="group flex items-center gap-2 bg-black text-white px-8 py-4 rounded-2xl font-black hover:bg-emerald-600 transition-all"
+                    className="group flex items-center gap-2 bg-black text-white px-8 py-4 rounded-2xl font-black transition-all"
                   >
                     Continue
                     <ChevronRight

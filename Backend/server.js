@@ -12,7 +12,7 @@ import './config/passport.js';
 import CommentRoute from './routes/CommentRoute.js'
 import DeliveryRoute from './routes/DeliveryRoute.js';
 import orderRoute from './routes/orderRoute.js'
-
+import requestDeliveryRoute from './routes/RequestDeliveryRoute.js'
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 dotenv.config();
@@ -35,7 +35,7 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/comment",CommentRoute);
 app.use("/api/delivery",DeliveryRoute);
 app.use("/api/orders",orderRoute);
-
+app.use("/api/delivery-request", requestDeliveryRoute);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
