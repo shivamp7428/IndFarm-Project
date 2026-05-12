@@ -2,7 +2,7 @@ import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import Delivery from "../models/DeliveryPartner.js";
 import User from "../models/User.js";
-
+import DeliveryRequest from '../models/RequestDelivery.js'
 
 export const createOrder = async (req, res) => {
    try {
@@ -290,7 +290,6 @@ export const assignDeliveryPartner = async (req, res) => {
     if (deliveryPartnerId === "SELF") {
 
       const farmer = await User.findById(req.user.id);
-
       if (!farmer) {
         return res.status(404).json({
           success: false,
@@ -298,12 +297,11 @@ export const assignDeliveryPartner = async (req, res) => {
         });
       }
 
-      order.deliveryPartner = null; 
+      order.deliveryPartner = farmer._id; 
       order.deliveryStatus = "assigned";
       order.orderStatus = "packed";
 
       await order.save();
-
       return res.status(200).json({
         success: true,
         message: "Self delivery assigned successfully",
@@ -346,27 +344,29 @@ export const assignDeliveryPartner = async (req, res) => {
     });
   }
 };
-// GET DELIVERY ORDERS
-export const getDeliveryOrders = async (req, res) => {
-   try {
-      const orders = await Order.find({
-            deliveryPartner: req.params.deliveryId
-         })
-            .populate("customer", "name")
-            .populate("farmer", "name")
-            .sort({ createdAt: -1 });
 
-      res.status(200).json({
-         success: true,
-         orders
-      });
-   }
-   catch (error) {
-      res.status(500).json({
-         success: false,
-         message: error.message
-      });
-   }
+export const getDeliveryOrders = async (req, res) => {
+  try {
+    const { deliveryPartnerId } = req.params;
+
+    const orders = await Order.find({
+      deliveryPartner: deliveryPartnerId
+    })
+    .populate("customer", "fullName profileImage phone") 
+    .populate("farmer", "fullName farmName address latitude longitude")
+    .sort({ createdAt: -1 }); 
+
+    return res.status(200).json({
+      success: true,
+      orders 
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 };
 // ACCEPT DELIVERY
 export const acceptDelivery = async (req, res) => {

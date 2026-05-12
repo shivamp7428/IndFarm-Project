@@ -19,7 +19,7 @@ export const createBlog = async (req, res) => {
 export const getAllBlogs = async (req, res) => {
   try {
     const blogs = await Blog.find()
-      .populate("farmerId", "fullName farmName farmImageUrl")
+      .populate("farmerId", "fullName farmName img") 
       .sort("-createdAt");
 
     res.status(200).json({ success: true, data: blogs });

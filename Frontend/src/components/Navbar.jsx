@@ -1,7 +1,7 @@
 "use client";
 import { useNavigate } from "react-router-dom";
 import React, { useState, useRef, useEffect } from "react";
-import { Leaf, ShoppingCart, Package, Search, MapPin, Menu, X, User, ChevronRight, ChevronDown, Home, ShoppingBag, Settings, LogOut, Info, LayoutDashboard, Globe, Bell, Truck, User2 } from "lucide-react";
+import { Leaf, ShoppingCart, Package, Search, MapPin, Menu, X, User, ChevronRight, ChevronDown, Home, ShoppingBag, Settings, LogOut, Info, LayoutDashboard, Globe, Bell, Truck, User2, Newspaper } from "lucide-react";
 import { useTranslation } from "../context/LanguageContext";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
@@ -284,41 +284,26 @@ useEffect(()=>{
 
    {
       user?.role !== "farmer" && (
-
       deliveryPartner ? (
-
          <a
             href={`/user-delivery-dashboard/${userId}/${deliveryPartner._id}`}
             className="block"
          >
-
             <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-bold text-slate-600">
-
                <LayoutDashboard size={16} />
-
-               Dashboard
-
+              Delivery Dashboard
             </button>
-
          </a>
-
       ) : (
-
          <a
             href={`/become-delivery-man/${userId}`}
             className="block"
          >
-
             <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 text-sm font-bold transition-all text-slate-600">
-
                <Truck size={16} />
-
                Become Delivery Partner
-
             </button>
-
          </a>
-
       )
    )}
 
@@ -360,7 +345,6 @@ function MobileMenu({ isOpen, setIsOpen }) {
 
   const navItems = [
     { name: t.home, icon: Home, link: "/" },
-    { name: t.shopcategories, icon: ShoppingBag, link: "/categories" },
     ...(isAuthenticated && userId ? [
   {
     name: user?.role === "farmer" ? "Sales Orders" : t.myorders,
@@ -384,7 +368,7 @@ function MobileMenu({ isOpen, setIsOpen }) {
     ]
   : []),
     
-    { name: t.settings, icon: Settings, link: "/settings" },
+    { name: t.blog, icon: Newspaper, link: "/blog" },
     { name: t.aboutkisanmitra, icon: Info, link: "/about" },
   ];
 

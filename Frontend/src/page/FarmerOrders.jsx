@@ -351,11 +351,16 @@ const PurchaseOrderCard = ({ order, navigate }) => {
                </button>
              ) : (
                <button 
-                 onClick={() => navigate("/track-delivery", { state: { order } })}
-                 className="flex items-center justify-center gap-2 px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm transition-all shadow-lg shadow-emerald-200"
-                >
-                <MapPin size={18} /> Track Live
-              </button>
+                 onClick={() => {
+                 const address = order.shippingAddress?.address;
+               if (address) {
+                  window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
+                }
+               }}
+             className="flex items-center cursor-pointer justify-center gap-2 px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm transition-all shadow-lg shadow-emerald-200"
+             >
+          <MapPin size={18} /> Track Live
+            </button>
              )
           )}
             </>
@@ -393,6 +398,7 @@ const PurchaseOrderCard = ({ order, navigate }) => {
 };
 
 const SalesCard = ({ order, refresh, token }) => {
+  const navigate = useNavigate();
   const [updating, setUpdating] = useState(false);
   const [productDetails, setProductDetails] = useState({});
   const [fetching, setFetching] = useState(false);
@@ -646,8 +652,11 @@ const currentStepIndex = statusSteps.indexOf(order.orderStatus);
               <MapPin size={18} /> Track Live
             </button>
 
-            <button className="flex items-center cursor-pointer justify-center gap-2 py-4.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-[1.8rem] font-black text-sm tracking-widest border border-slate-200 transition-all">
-              <ExternalLink size={18} /> Details
+            <button 
+              onClick={() => navigate(`/order-details/${order._id}`)} // Navigation logic
+             className="flex items-center cursor-pointer justify-center gap-2 py-4.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-[1.8rem] font-black text-sm tracking-widest border border-slate-200 transition-all"
+            >
+            <ExternalLink size={18} /> Details
             </button>
           </>
         )}

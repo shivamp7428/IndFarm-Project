@@ -75,7 +75,6 @@ export const signup = async (req, res) => {
   }
 };
 
-
 export const login = async (req, res) => {
   try {
     const { identifier, password } = req.body;
@@ -360,5 +359,128 @@ export const getFarmerById = async (req, res) => {
       success: false,
       message: "Server Error",
     });
+  }
+};
+
+// GET ALL FARMERS
+export const getAllFarmers = async (req, res) => {
+  try {
+
+    const farmers = await User.find({
+      role: "farmer"
+    }).select("-password -otp -otpExpiry");
+
+    return res.status(200).json({
+      success: true,
+      totalFarmers: farmers.length,
+      farmers
+    });
+
+  } catch (error) {
+
+    console.log("GET ALL FARMERS ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server Error"
+    });
+
+  }
+};
+
+
+
+///dummy data 
+// CREATE FARMER
+export const createFarmer = async (req, res) => {
+  try {
+
+    const {
+      fullName,
+      identifier,
+      password,
+      phone,
+      farmName,
+      farmLocation,
+      farmingType,
+      about,
+      stars,
+      img,
+      farmImageUrl,
+      products,
+      isVerified
+    } = req.body;
+
+    // CHECK EXISTING USER
+    const existingUser = await User.findOne({ identifier });
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Farmer already exists"
+      });
+    }
+
+    // HASH PASSWORD
+    const salt = await bcrypt.genSalt(10);
+
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // CREATE FARMER
+    const newFarmer = new User({
+      fullName,
+
+      identifier,
+
+      password: hashedPassword,
+
+      role: "farmer",
+
+      phone: phone || "",
+
+      farmName: farmName || "",
+
+      farmLocation: farmLocation || "",
+
+      farmingType: farmingType || "",
+
+      about: about || "",
+
+      stars: stars || 0,
+
+      img: img || "",
+
+      farmImageUrl: farmImageUrl || "",
+
+      products: Array.isArray(products)
+        ? products
+        : products
+        ? products.split(",")
+        : [],
+
+      isVerified:
+        isVerified !== undefined
+          ? isVerified
+          : true
+    });
+
+    await newFarmer.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Farmer created successfully",
+      farmer: newFarmer
+    });
+
+  } catch (error) {
+
+    console.log("CREATE FARMER ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+      error: error.message
+    });
+
   }
 };
