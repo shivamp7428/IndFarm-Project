@@ -1,14 +1,22 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Link ,useNavigate} from "react-router-dom";
 import axios from "axios";
 import { useTranslation } from "../context/LanguageContext";
 import { ChevronLeft } from "lucide-react";
+
 
 function ProductSection() {
   
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(10000);
+
+  const searchParams = new URLSearchParams(location.search);
+  const searchTerm = searchParams.get("search") || "";
 
   const { translations: t } = useTranslation();
 
@@ -51,10 +59,37 @@ function ProductSection() {
       {t.back || "Back"}
     </span>
   </button>
+
+  <div className="flex gap-4 mb-6 bg-white p-4 rounded-lg shadow-sm">
+  <div className="flex flex-col">
+    <label className="text-xs font-bold text-gray-500">Min Price</label>
+    <input 
+      type="number" 
+      value={minPrice} 
+      onChange={(e) => setMinPrice(Number(e.target.value))}
+      className="border rounded px-2 py-1 w-24"
+    />
+  </div>
+  <div className="flex flex-col">
+    <label className="text-xs font-bold text-gray-500">Max Price</label>
+    <input 
+      type="number" 
+      value={maxPrice} 
+      onChange={(e) => setMaxPrice(Number(e.target.value))}
+      className="border rounded px-2 py-1 w-24"
+    />
+  </div>
+</div>
      
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
   {products.length > 0 ? (
-    products.map((product) => (
+    products.filter((product) => {
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
+      
+      return matchesSearch && matchesPrice;
+    }).map((product) => (
       <Link
         key={product._id || product.id}
         to={`/detail/${product._id || product.id}`}

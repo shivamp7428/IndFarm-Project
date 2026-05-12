@@ -1,4 +1,5 @@
 "use client";
+import { useNavigate } from "react-router-dom";
 import React, { useState, useRef, useEffect } from "react";
 import { Leaf, ShoppingCart, Package, Search, MapPin, Menu, X, User, ChevronRight, ChevronDown, Home, ShoppingBag, Settings, LogOut, Info, LayoutDashboard, Globe, Bell, Truck, User2 } from "lucide-react";
 import { useTranslation } from "../context/LanguageContext";
@@ -69,6 +70,14 @@ function SearchBar() {
   const { translations: t } = useTranslation();
   const [isNearMe, setIsNearMe] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    
+    navigate(`/marketplace?search=${value}`);
+  };
 
   return (
     <div className="flex-1 max-w-3xl hidden md:flex items-center bg-slate-50 border border-emerald-100 rounded-2xl p-1 focus-within:ring-4 ring-emerald-500/10 focus-within:border-emerald-500 transition-all duration-300 mx-6">
@@ -78,7 +87,7 @@ function SearchBar() {
         type="text"
         placeholder={t.search}
         value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        onChange={handleSearchChange}
         className="flex-1 bg-transparent px-4 py-2 outline-none text-sm text-slate-700 font-medium"
       />
       <button
@@ -502,6 +511,7 @@ function MobileMenu({ isOpen, setIsOpen }) {
 // MAIN NAVBAR 
 
 export function Navbar({ cartCount = 0 }) {
+  const navigate = useNavigate();
   const { translations: t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -630,8 +640,18 @@ export function Navbar({ cartCount = 0 }) {
 
         <div className="md:hidden px-4 pb-4 bg-white">
           <div className="flex items-center bg-slate-50 border border-slate-100 rounded-2xl p-1">
-            <input type="text" placeholder={t.search} className="flex-1 bg-transparent px-4 py-2 outline-none text-sm font-medium" />
-            <button className="bg-emerald-600 p-2 rounded-xl text-white"><Search size={18} /></button>
+            <input 
+            type="text" placeholder={t.search} 
+            className="flex-1 bg-transparent px-4 py-2 outline-none text-sm font-medium"
+           onChange={(e) => navigate(`/marketplace?search=${e.target.value}`)}
+            />
+            <button className="bg-emerald-600 p-2 rounded-xl text-white"
+            onClick={() => {
+            const val = document.querySelector('.md\\:hidden input').value;
+             navigate(`/?search=${val}`);
+            }}>
+            <Search size={18} />
+            </button>
           </div>
         </div>
       </nav>

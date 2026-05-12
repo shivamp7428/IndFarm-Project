@@ -1,189 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Search, MapPin, Zap, Star, ShieldCheck, Truck, ChevronRight, ChevronLeft, ShoppingCart, Clock, ArrowRight, Heart, Store, PhoneCall,CheckCircle2, Award, Leaf, Sprout, ShoppingBag, Eye} from 'lucide-react';
 import { useTranslation } from "../context/LanguageContext";
 import { Link } from "react-router-dom";
 
-const ALL_PRODUCTS = (t) => [
-  { 
-    id: 1, 
-    name: "Organic Spinach", 
-    price: "30", 
-    farmName: "Bhopal Bio-Farm", 
-    farmerName: "Ram Singh",
-    farmerImg: "https://images.unsplash.com/photo-1595033531232-3919939d7ff8?q=80&w=200",
-    img: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?q=80&w=400", 
-    rating: 3.8,
-    quantity:1
-  },
-  { 
-    id: 2, 
-    name: "Red Onions", 
-    price: "45", 
-    farmName: "Patel Mandi", 
-    farmerName: "Arjun Patel",
-    farmerImg: "https://images.unsplash.com/photo-1541577141970-eebc83ebe30e?q=80&w=200",
-    img: "https://images.unsplash.com/photo-1508747703725-719777637510?q=80&w=400", 
-    rating: 2.5,
-    quantity:7
-
-  },
-  { 
-    id: 3, 
-    name: "Fresh Garlic", 
-    price: "180", 
-    farmName: "Indore Roots", 
-    farmerName: "Sanjay Mishra",
-    farmerImg: "https://images.unsplash.com/photo-1618331835717-801e976710b2?q=80&w=200",
-    img: "https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?q=80&w=400", 
-    rating: 4.9,
-    quantity:3
-
-  },
-  { 
-    id: 4, 
-    name: "Arhar Dal", 
-    price: "140", 
-    farmName: "Vidisha Grains", 
-    farmerName: "Lakshmi Bai",
-    farmerImg: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?q=80&w=200",
-    img: "https://images.unsplash.com/photo-1612869538502-b5baa439abd7?w=600&auto=format&fit=crop&q=60", 
-    rating: 2.7,
-    quantity:2
-
-  },
-  { 
-    id: 5, 
-    name: "Cow Ghee", 
-    price: "650", 
-    farmName: "Sanchi Dairy", 
-    farmerName: "Vikram Yadav",
-    farmerImg: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200",
-    img: "https://images.unsplash.com/photo-1589927986089-35812388d1f4?q=80&w=400", 
-    rating: 5.0,
-    quantity:7
-
-  },
-  { 
-    id: 6, 
-    name: "Local Tomatoes", 
-    price: "25", 
-    farmName: "Raisen Greens", 
-    farmerName: "Deepak Kushwaha",
-    farmerImg: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200",
-    img: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=400", 
-    rating: 4.2,
-    quantity:9
-
-  },
-  { 
-    id: 7, 
-    name: "Green Chillies", 
-    price: "60", 
-    farmName: "Kisan Colony", 
-    farmerName: "Om Prakash",
-    farmerImg: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200",
-    img: "https://images.unsplash.com/photo-1588252303782-cb80119abd6d?q=80&w=400", 
-    rating: 4.4,
-    quantity:2
-
-  },
-  { 
-    id: 8, 
-    name: "Cauliflower", 
-    price: "40", 
-    farmName: "Sehore Valley", 
-    farmerName: "Sunita Verma",
-    farmerImg: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200",
-    img: "https://images.unsplash.com/photo-1566842600175-97dca489844f?q=80&w=400", 
-    rating: 4.6,
-    quantity:5
-
-  },
-  { 
-    id: 9, 
-    name: "Ginger", 
-    price: "120", 
-    farmName: "Valley Roots", 
-    farmerName: "Rahul Sharma",
-    farmerImg: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=200",
-    img: "https://images.unsplash.com/photo-1599940859674-a7fef05b94ae?q=80&w=400", 
-    rating: 4.7,
-    quantity:4
-
-  },
-  { 
-    id: 10, 
-    name: "Mustard Oil", 
-    price: "190", 
-    farmName: "Pure Press", 
-    farmerName: "Harpreet Singh",
-    farmerImg: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200",
-    img: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?q=80&w=400", 
-    rating: 4.8,
-    quantity:8
-
-  },
-  { 
-    id: 11, 
-    name: "Basmati Rice", 
-    price: "90", 
-    farmName: "Punjab Gold", 
-    farmerName: "Gurnam Singh",
-    farmerImg: "https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?q=80&w=200",
-    img: "https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400", 
-    rating: 4.9,
-    quantity:10
-
-  },
-  { 
-    id: 12, 
-    name: "Watermelon", 
-    price: "350", 
-    farmName: "Wild Nectar", 
-    farmerName: "Anita Deshmukh",
-    farmerImg: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200",
-    img: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=400", 
-    rating: 4.3,
-    quantity:2
-
-  },
-  { 
-    id: 13, 
-    name: "Potatoes", 
-    price: "20", 
-    farmName: "Malwa Farms", 
-    farmerName: "Kailash Chand",
-    farmerImg: "https://images.unsplash.com/photo-1521119989659-a83eee488004?q=80&w=200",
-    img: "https://images.unsplash.com/photo-1635774855536-9728f2610245?q=80&w=400", 
-    rating: 4.1,
-    quantity:9
-
-  },
-  { 
-    id: 14, 
-    name: "Turmeric", 
-    price: "240", 
-    farmName: "Spice Route", 
-    farmerName: "Rajeshwari Devi",
-    farmerImg: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?q=80&w=200",
-    img: "https://images.unsplash.com/photo-1606951444141-e5533feb55be?w=600&auto=format&fit=crop&q=60", 
-    rating: 4.9,
-    quantity:8
-
-  },
-  { 
-    id: 15, 
-    name: "Pomegranate", 
-    price: "160", 
-    farmName: "Nashik Orchards", 
-    farmerName: "Vijay Kulkarni",
-    farmerImg: "https://images.unsplash.com/photo-1552058544-f2b08422138a?q=80&w=200",
-    img: "https://images.unsplash.com/photo-1601767770428-265b2c67780c?w=600&auto=format&fit=crop&q=60", 
-    rating: 3.7,
-    quantity:5
-
-  },
-];
  const TOP_FARMERS = (t) => [
   {
     id: 1,
@@ -301,8 +121,25 @@ const ALL_PRODUCTS = (t) => [
 export default function Home() {
   const { translations: t } = useTranslation();
 
-
   if (!t) return <div className="h-screen flex items-center justify-center font-black text-green-600 animate-pulse uppercase tracking-widest">{t?.loading || "Loading KisanMitra..."}</div>;
+
+  const [realProducts, setRealProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  useEffect(() => {
+    const fetchHomeProducts = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/products");
+        const data = res.data.data || [];
+        setRealProducts(data.slice(0, 15)); 
+      } catch (error) {
+        console.error("Error fetching home products:", error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+    fetchHomeProducts();
+  }, []);
 
   const carouselSlides = [
     {
@@ -412,7 +249,7 @@ useEffect(() => {
   </div>
 </section>
 
-{/* Product Card*/}
+{/* Product Card Section */}
 <section className="max-w-[1500px] mx-auto px-4 py-8 bg-gray-100">
   <div className="flex justify-between items-baseline mb-6 px-1">
     <h2 className="text-xl font-bold tracking-tight text-gray-900">
@@ -424,31 +261,38 @@ useEffect(() => {
   </div>
 
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
-    {ALL_PRODUCTS(t).map((product) => (
-      <Link
-        key={product.id}
-        to={`/detail/${product.id}`}
-        state={{ product: product }}
-        className="bg-white flex flex-col h-[320px] p-4 shadow-none hover:shadow-md transition-shadow duration-200"
-      >
-        <div className="h-[40px] mb-3 overflow-hidden">
-          <h3 className="text-sm font-bold text-gray-900 line-clamp-2 leading-tight">
-            {product.name}
-          </h3>
-        </div>
+    {loadingProducts ? (
+      // Loading Spinner
+      <div className="col-span-full py-10 text-center text-green-600 font-bold">Loading...</div>
+    ) : realProducts.length > 0 ? (
+      realProducts.map((product) => (
+        <Link
+          key={product._id || product.id}
+          to={`/detail/${product._id || product.id}`}
+          state={{ product: product }}
+          className="bg-white flex flex-col h-[320px] p-4 shadow-none hover:shadow-md transition-shadow duration-200"
+        >
+          <div className="h-[40px] mb-3 overflow-hidden">
+            <h3 className="text-sm font-bold text-gray-900 line-clamp-2 leading-tight">
+              {product.name}
+            </h3>
+          </div>
 
-        <div className="relative w-full h-[250px] bg-white flex items-center justify-center overflow-hidden">
-          <img
-            src={product.img}
-            alt={product.name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.src = "https://media.istockphoto.com/id/2182219687/photo/online-advertising-concepts-to-target-customers-influencer-marketing-social-media.webp?a=1&b=1&s=612x612&w=0&k=20&c=DwRxJVvzERqtg5oDpv_1v7zjNolIdcjcbA7pjNSlkhk=";
-            }}
-          />
-        </div>
-      </Link>
-    ))}
+          <div className="relative w-full h-[250px] bg-white flex items-center justify-center overflow-hidden">
+            <img
+              src={product.productImageUrl} 
+              alt={product.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.src = "https://media.istockphoto.com/id/2211020890/photo/businesswoman-doing-digital-marketing-and-online-advertising-to-target-customers-online-sales.webp?a=1&b=1&s=612x612&w=0&k=20&c=Z9a0Pl7tBfI4JebhhMptU43bpfmQQAt9eV_xtVctI2U=";
+              }}
+            />
+          </div>
+        </Link>
+      ))
+    ) : (
+      <div className="col-span-full text-center py-10">No Products Available</div>
+    )}
   </div>
 </section>
 
