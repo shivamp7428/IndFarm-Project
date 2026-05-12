@@ -19,14 +19,18 @@ const CartPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Right code to track user: Check if token exists in localStorage
-    const token = localStorage.getItem("token"); // Aapka auth logic
+    const token = localStorage.getItem("token");
     
     if (token) {
       setIsLoggedIn(true);
-      // 2. Data Fetching
-      // Real API: fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` }})
-      setCartItems(DUMMY_CART);
+      
+      const savedCart = localStorage.getItem("cart");
+      
+      if (savedCart) {
+        setCartItems(JSON.parse(savedCart));
+      } else {
+        setCartItems([]);
+      }
     } else {
       setIsLoggedIn(false);
     }
@@ -34,14 +38,18 @@ const CartPage = () => {
     setLoading(false);
   }, []);
 
-  const updateQuantity = (id, delta) => {
-    setCartItems(prev => prev.map(item => 
-      item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
-    ));
+ const updateQuantity = (id, delta) => {
+    const updatedCart = cartItems.map(item => 
+      item._id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
+    );
+    setCartItems(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart)); // LocalStorage update
   };
 
   const removeItem = (id) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
+    const updatedCart = cartItems.filter(item => item._id !== id);
+    setCartItems(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart)); // LocalStorage update
   };
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
@@ -87,7 +95,7 @@ const CartPage = () => {
             <div className="lg:col-span-2 space-y-4">
               {cartItems.length > 0 ? (
                 cartItems.map((item) => (
-                  <div key={item.id} className="bg-white border border-slate-100 rounded-3xl p-4 flex gap-4 items-center shadow-sm hover:shadow-md transition-shadow">
+                  <div key={item._id || item.id} className="bg-white border border-slate-100 rounded-3xl p-4 flex gap-4 items-center shadow-sm hover:shadow-md transition-shadow">
                     <img src={item.image} alt={item.name} className="w-24 h-24 rounded-2xl object-cover bg-slate-50 shrink-0" />
                     <div className="flex-1">
                       <h3 className="font-black text-slate-800 text-lg leading-tight">{item.name}</h3>
@@ -95,11 +103,11 @@ const CartPage = () => {
                       
                       <div className="flex items-center justify-between mt-3">
                         <div className="flex items-center bg-slate-100 rounded-xl p-1">
-                          <button onClick={() => updateQuantity(item.id, -1)} className="p-1.5 hover:bg-white rounded-lg transition-all text-slate-500"><Minus size={14} /></button>
+                          <button onClick={() => updateQuantity(item._id, -1)} className="p-1.5 hover:bg-white rounded-lg transition-all text-slate-500"><Minus size={14} /></button>
                           <span className="px-4 font-black text-slate-800 text-sm">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.id, 1)} className="p-1.5 hover:bg-white rounded-lg transition-all text-slate-500"><Plus size={14} /></button>
+                          <button onClick={() => updateQuantity(item._id, 1)} className="p-1.5 hover:bg-white rounded-lg transition-all text-slate-500"><Plus size={14} /></button>
                         </div>
-                        <button onClick={() => removeItem(item.id)} className="text-red-400 hover:text-red-600 p-2 transition-colors"><Trash2 size={20} /></button>
+                        <button onClick={() => removeItem(item._id)} className="text-red-400 hover:text-red-600 p-2 transition-colors"><Trash2 size={20} /></button>
                       </div>
                     </div>
                   </div>

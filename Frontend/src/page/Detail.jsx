@@ -111,6 +111,30 @@ export default function Detail() {
     }
   };
 
+  const addToCart = () => {
+  if (isOwnProfile) return;
+
+  const currentCart = JSON.parse(localStorage.getItem("cart")) || [];
+  
+  const existingItemIndex = currentCart.findIndex(item => item._id === product._id);
+
+  if (existingItemIndex > -1) {
+    currentCart[existingItemIndex].quantity += qty;
+  } else {
+    currentCart.push({
+      _id: product._id,
+      name: product.name,
+      price: product.price,
+      unit: product.unit,
+      image: product.productImageUrl,
+      quantity: qty
+    });
+  }
+
+  localStorage.setItem("cart", JSON.stringify(currentCart));
+  toast.success("Added to cart!");
+};
+
   const handleDeleteComment = async (commentId) => {
     // SweetAlert2 for Confirmation
     const result = await Swal.fire({
@@ -294,6 +318,7 @@ export default function Detail() {
 
   {/* Add To Cart */}
   <button
+    onClick={addToCart}
     disabled={isOwnProfile}
     className={`group flex-1 px-6 md:px-8 py-4 rounded-2xl font-bold transition-all duration-300
       ${
