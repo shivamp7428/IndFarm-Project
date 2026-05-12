@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
 const deliveryRequestSchema = new mongoose.Schema({
-
    orderId:{
       type:mongoose.Schema.Types.ObjectId,
       ref:"Order",

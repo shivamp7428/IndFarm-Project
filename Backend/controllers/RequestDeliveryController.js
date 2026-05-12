@@ -6,7 +6,8 @@ import Order from "../models/Order.js";
 export const sendDeliveryRequest = async (req, res) => {
    try {
 
-      const { orderId, deliveryPartnerId, deliveryDate, deliveryTime, note} = req.body;
+      const { orderId, deliveryPartnerId, deliveryDate, deliveryTime, note } = req.body;
+
       if (!orderId || !deliveryPartnerId || !deliveryDate || !deliveryTime) {
          return res.status(400).json({
             success: false,
@@ -15,6 +16,7 @@ export const sendDeliveryRequest = async (req, res) => {
       }
 
       const order = await Order.findById(orderId);
+
       if (!order) {
          return res.status(404).json({
             success: false,
@@ -22,12 +24,6 @@ export const sendDeliveryRequest = async (req, res) => {
          });
       }
 
-      if (order.farmer.toString() !== req.user.id) {
-         return res.status(403).json({
-            success: false,
-            message: "You are not allowed to send request for this order"
-         });
-      }
       const deliveryPartner = await Delivery.findById(deliveryPartnerId);
 
       if (!deliveryPartner) {
@@ -37,9 +33,24 @@ export const sendDeliveryRequest = async (req, res) => {
          });
       }
 
+      if (order.customer.toString() === deliveryPartner.userId.toString()) {
+         return res.status(400).json({
+            success: false,
+            message: "Customer cannot be assigned as delivery partner for this order"
+         });
+      }
+
+      if (order.farmer.toString() !== req.user.id) {
+         return res.status(403).json({
+            success: false,
+            message: "You are not allowed to send request for this order"
+         });
+      }
+
       const existingRequest = await DeliveryRequest.findOne({
          orderId,
-         deliveryPartnerId
+         deliveryPartnerId,
+         status: "pending"
       });
 
       if (existingRequest) {
@@ -137,53 +148,54 @@ export const getDeliveryPartnerRequests = async (req, res) => {
 };
 
 export const acceptDeliveryRequest = async (req, res) => {
+  try {
+    const request = await DeliveryRequest.findOneAndUpdate(
+      { _id: req.params.requestId, status: "pending" },
+      { status: "accepted" },
+      { new: true }
+    );
 
-   try {
-
-      const request = await DeliveryRequest.findById(req.params.requestId);
-
-      if (!request) {
-         return res.status(404).json({
-            success: false,
-            message: "Request not found"
-         });
-      }
-
-      request.status = "accepted";
-
-      await request.save();
-
-      await Order.findByIdAndUpdate(
-        request.orderId,
-       {
-        deliveryPartner: request.deliveryPartnerId,
-        orderStatus: "shipped",
-        deliveryStatus: "accepted"
-      }
-     );
-      await DeliveryRequest.updateMany(
-         {
-            orderId: request.orderId,
-            _id: { $ne: request._id },
-            status: "pending"
-         },
-         {
-            status: "rejected"
-         }
-      );
-
-      res.status(200).json({
-         success: true,
-         message: "Delivery request accepted"
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: "Request not found or already processed"
       });
+    }
 
-   } catch (error) {
-
-      res.status(500).json({
-         success: false,
-         message: error.message
+    const order = await Order.findById(request.orderId);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
       });
-   }
+    }
+
+    await Order.findByIdAndUpdate(request.orderId, {
+      deliveryPartner: request.deliveryPartnerId,
+      orderStatus: "packed",
+      deliveryStatus: "assigned"
+    });
+
+    await DeliveryRequest.updateMany(
+      {
+        orderId: request.orderId,
+        _id: { $ne: request._id },
+        status: "pending"
+      },
+      { status: "rejected" }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Delivery request accepted & order assigned"
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 };
 
 export const rejectDeliveryRequest = async (req, res) => {

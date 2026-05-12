@@ -29,10 +29,9 @@ import DeliveryForm from "./page/DeliveryForm";
 import Checkout from "./page/CheckOut";
 import MyOrders from "./page/MyOrders";
 import FarmerOrder from "./page/FarmerOrders";
-import AssignDelivery from "./page/AssignDelivery";
+
 
 function App() {
-  const [open, setOpen] = useState(false);
   return (
     <AuthProvider>   
       <ScrollToTop />
@@ -47,11 +46,6 @@ function App() {
         <Route path="/faqs" element={<FAQPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/refund" element={<RefundPage />} />
-        <Route path="/del" element={<AssignDelivery 
-         isOpen={open}
-         onClose={()=>setOpen(false)}
-         />} />
-
         <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/detail/:id" element={<Detail />} />
         <Route path="/farmerProfile/:id" element={<FarmerProfile />} />

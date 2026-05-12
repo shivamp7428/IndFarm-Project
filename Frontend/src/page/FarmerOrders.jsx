@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Truck, Info, ShieldCheck, CheckCircle, XCircle, Check,Clock, Zap, ShoppingBag, Phone,ExternalLink,Store,ShoppingBasket,ArrowLeft} from 'lucide-react';
+import { MapPin, Truck, Info,  KeyRound, Loader2 ,ShieldCheck, CheckCircle, XCircle, Check,Clock, Zap, ShoppingBag, Phone,ExternalLink,Store,ShoppingBasket,ArrowLeft, CheckCircle2} from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
+import AssignDelivery from "./AssignDelivery"
+
 
 const FarmerOrder = () => {
   const [activeTab, setActiveTab] = useState('sales'); 
@@ -247,14 +250,14 @@ const PurchaseOrderCard = ({ order, navigate }) => {
                 }}
               />
             {statusSteps.map((step, i) => {
-  const labels = {
-  placed: "Order Placed",
-  accepted: "Accepted",
-  packed: "Packed",
-  shipped: "Shipped",
-  out_for_delivery: "Out For Delivery",
-  delivered: "Delivered"
-};
+                 const labels = {
+                 placed: "Order Placed",
+                 accepted: "Accepted",
+                 packed: "Packed",
+                 shipped: "Shipped",
+                 out_for_delivery: "Out For Delivery",
+                  delivered: "Delivered"
+              };
 
   return (
     <div
@@ -339,12 +342,22 @@ const PurchaseOrderCard = ({ order, navigate }) => {
                 </button>
               )}
 
-              <button 
-                onClick={() => navigate("/track-delivery", { state: { order } })}
-                className="flex items-center justify-center gap-2 px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm transition-all shadow-lg shadow-emerald-200"
-              >
+              {!isCancelled && (
+                 order.orderStatus === "delivered" ? (
+                <button disabled
+                className="flex items-center justify-center gap-2 px-8 py-4 bg-slate-200 text-slate-500 rounded-2xl font-black text-sm cursor-not-allowed"
+                 >
+                <CheckCircle2 size={18} /> Order Completed
+               </button>
+             ) : (
+               <button 
+                 onClick={() => navigate("/track-delivery", { state: { order } })}
+                 className="flex items-center justify-center gap-2 px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm transition-all shadow-lg shadow-emerald-200"
+                >
                 <MapPin size={18} /> Track Live
               </button>
+             )
+          )}
             </>
           )}
 
@@ -383,22 +396,19 @@ const SalesCard = ({ order, refresh, token }) => {
   const [updating, setUpdating] = useState(false);
   const [productDetails, setProductDetails] = useState({});
   const [fetching, setFetching] = useState(false);
+  
+  // Modal States
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpInput, setOtpInput] = useState("");
 
-  const formatTimeAgo = (date) => {
-    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-    let interval = Math.floor(seconds / 31536000);
-    if (interval >= 1) return interval + " year" + (interval > 1 ? "s" : "") + " ago";
-    interval = Math.floor(seconds / 2592000);
-    if (interval >= 1) return interval + " month" + (interval > 1 ? "s" : "") + " ago";
-    interval = Math.floor(seconds / 86400);
-    if (interval >= 1) return interval + " day" + (interval > 1 ? "s" : "") + " ago";
-    interval = Math.floor(seconds / 3600);
-    if (interval >= 1) return interval + " hr" + (interval > 1 ? "s" : "") + " ago";
-    interval = Math.floor(seconds / 60);
-    if (interval >= 1) return interval + " min" + (interval > 1 ? "s" : "") + " ago";
-    return "just now";
-  };
+  // Logic Steps
+  const statusSteps = ["placed", "accepted", "packed", "shipped", "out_for_delivery", "delivered"];
 
+const currentStepIndex = statusSteps.indexOf(order.orderStatus);
+  const nextStep = statusSteps[currentStepIndex + 1];
+  const isCancelled = order.orderStatus === "cancelled";
+  
   useEffect(() => {
     if (Object.keys(productDetails).length > 0 || fetching) return;
     const fetchLiveDetails = async () => {
@@ -409,8 +419,7 @@ const SalesCard = ({ order, refresh, token }) => {
           order.products.map(async (p) => {
             try {
               const res = await axios.get(`http://localhost:5000/api/products/${p.product}`);
-              if (res.data && res.data.data) details[p.product] = res.data.data;
-              else details[p.product] = res.data;
+              details[p.product] = res.data.data || res.data;
             } catch (e) { console.error("Error fetching product:", p.product); }
           })
         );
@@ -420,42 +429,125 @@ const SalesCard = ({ order, refresh, token }) => {
     fetchLiveDetails();
   }, [order._id]);
 
- const statusSteps = ["placed","accepted","packed","shipped","out_for_delivery","delivered"];
-  const currentStepIndex = statusSteps.indexOf(order.orderStatus);
-  const nextStep = statusSteps[currentStepIndex + 1];
-  const isCancelled = order.orderStatus === "cancelled";
+  const handleActionTrigger = async () => {
+  if (!nextStep) return;
+  if (nextStep === "delivered") {
+    setShowOtpModal(true);
+    return;
+  }
+  if (nextStep === "packed") {
+    console.log("OPENING ASSIGN MODAL");
+    setShowAssignModal(true);
+    return;
+  }
+  await updateOrderStatus(nextStep);
+};
 
-  const updateStatus = async (action) => {
+  useEffect(() => {
+}, [showAssignModal]);
+
+  const updateOrderStatus = async (action) => {
     setUpdating(true);
     try {
-      const endpoint = action === "packed" ? "pack" : action === "shipped" ? "assign-delivery" : action === "delivered" ? "deliver"
-    : action;
-      await axios.put(`http://localhost:5000/api/orders/${endpoint}/${order._id}`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      refresh();
+      const endpointMap = {
+       accepted: "accept",
+       packed: "pack",
+       shipped: "pickup",
+        out_for_delivery: "out-for-delivery",  
+       delivered: "deliver",
+       cancel: "cancel"
+      };
+      const endpoint = endpointMap[action] || action;
+
+      const res = await axios.put(
+        `http://localhost:5000/api/orders/${endpoint}/${order._id}`, 
+        { otp: action === 'delivered' ? otpInput : undefined },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success(`Order ${action.replace(/_/g, ' ')} successfully!`);
+      setShowOtpModal(false);
+      setOtpInput("");
+      refresh(); 
     } catch (err) {
-      alert("Error: " + (err.response?.data?.message || "Server error"));
-    } finally { setUpdating(false); }
+      console.error("Update Error:", err);
+      toast.error(err.response?.data?.message || "Action failed");
+    } finally {
+      setUpdating(false);
+    }
+  };
+  // --- Logic Fix End ---
+
+  const formatTimeAgo = (date) => {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    let interval = Math.floor(seconds / 3600);
+    if (interval >= 1) return interval + " hr ago";
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1) return interval + " min ago";
+    return "just now";
   };
 
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }} 
       animate={{ opacity: 1, scale: 1 }}
-      className="bg-white rounded-[2.8rem] shadow-xl shadow-slate-200/60 border border-slate-50 overflow-hidden transition-all mb-6"
-     >
-      {/* 1. TOP SECTION */}
-     <div className={`px-10 py-4 flex justify-between items-center border-b ${isCancelled  ? 'bg-red-50 border-red-100'  : 'bg-slate-50 border-slate-100'}`}>
+      className="bg-white rounded-[2.8rem] shadow-xl shadow-slate-200/60 border border-slate-50 overflow-hidden transition-all mb-6 relative"
+    >
+      <Toaster />
+      
+      {/* Assign Delivery Modal */}
+      {showAssignModal && (
+        <AssignDelivery 
+          isOpen={showAssignModal} 
+          onClose={() => setShowAssignModal(false)} 
+          orderId={order._id} 
+        />
+      )}
+
+      {/* OTP Verification Modal */}
+      <AnimatePresence>
+        {showOtpModal && (
+          <div className="fixed inset-0 z-[110] bg-slate-900/40 backdrop-blur-sm flex justify-center items-center p-4">
+            <motion.div initial={{y: 20, opacity:0}} animate={{y:0, opacity:1}} exit={{y:20, opacity:0}} className="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto">
+                  <KeyRound size={32} />
+                </div>
+                <h3 className="text-xl font-black text-slate-800">Verify Delivery</h3>
+                <input 
+                  type="text" 
+                  maxLength={6}
+                  placeholder="OTP"
+                  className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-center text-2xl font-black outline-none focus:border-emerald-500"
+                  value={otpInput}
+                  onChange={(e) => setOtpInput(e.target.value)}
+                />
+                <div className="flex gap-3 pt-2">
+                  <button onClick={() => setShowOtpModal(false)} className="flex-1 py-4 font-bold text-slate-400">Cancel</button>
+                  <button 
+                    onClick={() => updateOrderStatus('delivered')}
+                    disabled={updating || otpInput.length < 4}
+                    className="flex-[2] py-4 font-black bg-emerald-500 text-white rounded-2xl shadow-lg disabled:opacity-50"
+                  >
+                    {updating ? 'Verifying...' : 'Confirm'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* AAPKA OLD UI START */}
+      <div className={`px-10 py-4 flex justify-between items-center border-b ${isCancelled ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100'}`}>
         <div className="flex items-center gap-3">
           <div className={`w-2 h-2 rounded-full ${isCancelled ? 'bg-red-500' : 'bg-emerald-500 animate-pulse'}`} />
           <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isCancelled ? 'text-red-500' : 'text-emerald-600'}`}>
             Stage: {order.orderStatus.replace(/_/g, ' ')}
           </span>
         </div>
-        
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5 ">
+          <div className="flex items-center gap-1.5">
             <Clock size={10} className="text-emerald-500" />
             <span className="text-[9px] font-black uppercase tracking-widest">{formatTimeAgo(order.createdAt)}</span>
           </div>
@@ -463,53 +555,30 @@ const SalesCard = ({ order, refresh, token }) => {
       </div>
 
       <div className="p-10 flex flex-col md:flex-row gap-10 items-center">
-        
         <div className="flex-1 flex flex-col gap-6 border-r border-slate-100 pr-4 w-full">
           <div className="flex gap-4">
             <div className="h-16 w-16 rounded-[1.5rem] bg-slate-50 flex items-center justify-center shadow-inner shrink-0 overflow-hidden border border-slate-100">
-              <img 
-                src={order.shippingAddress?.profileImage || "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
-                alt="user" 
-                className="w-full h-full object-cover" 
-              />
+              <img src={order.shippingAddress?.profileImage || "https://ui-avatars.com/api/?name="+order.shippingAddress?.fullName} alt="user" className="w-full h-full object-cover" />
             </div>
             <div className="flex flex-col justify-center">
               <h3 className="text-xl font-black text-slate-800 leading-none mb-1 tracking-tight">{order.shippingAddress?.fullName}</h3>
               <div className="flex items-start gap-1.5 text-slate-400">
                 <MapPin size={12} className="text-sky-500 shrink-0 mt-0.5" />
-                <p className="text-[10px] font-bold leading-relaxed">
-                  {order.shippingAddress?.address?.length > 20 
-                    ? `${order.shippingAddress.address.slice(0, 20)}...` 
-                    : order.shippingAddress?.address}
-                </p>
+                <p className="text-[10px] font-bold leading-relaxed">{order.shippingAddress?.address}</p>
               </div>
             </div>
           </div>
 
           <div className="pt-4 border-t border-slate-50">
             {order.products?.map((item, idx) => (
-              <div 
-                key={idx}
-                onClick={() => window.location.href = `/detail/${item.product}`}
-                className="flex items-center gap-4 group cursor-pointer hover:bg-slate-50 p-3 rounded-[2rem] transition-all"
-              >
-                <img 
-                  src={productDetails[item.product]?.productImageUrl || "https://via.placeholder.com/150"} 
-                 className="w-14 h-14 object-cover rounded-full ring-4 ring-slate-50 shadow-sm transition-transform duration-500 group-hover:scale-110"
-                  alt="product"
-                />
-
+              <div key={idx} className="flex items-center gap-4 p-3 rounded-[2rem] transition-all">
+                <img src={productDetails[item.product]?.productImageUrl} className="w-14 h-14 object-cover rounded-full ring-4 ring-slate-50" />
                 <div className="flex flex-col">
-                  <span className="text-sm font-black text-slate-700 transition-colors">
-                    {fetching ? "Loading..." : (productDetails[item.product]?.name || "Product Name")}
-                  </span>
+                  <span className="text-sm font-black text-slate-700">{productDetails[item.product]?.name || "Loading..."}</span>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg">Qty: {item.quantity}</span>
                     <span className="text-[10px] font-black text-emerald-600">₹{item.price}</span>
                   </div>
-                </div>
-                <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity pr-2">
-                    <ExternalLink size={14} className="text-emerald-500" />
                 </div>
               </div>
             ))}
@@ -517,11 +586,11 @@ const SalesCard = ({ order, refresh, token }) => {
         </div>
 
         <div className="w-full md:w-64 space-y-3">
-          <div className="flex justify-between text-sm font-black text-slate-400 tracking-tight">
+          <div className="flex justify-between text-sm font-black text-slate-400">
             <span>Product Price</span>
             <span className="text-slate-800">₹{order.totalProductPrice}</span>
           </div>
-          <div className="flex justify-between text-sm font-black text-slate-400 tracking-tight">
+          <div className="flex justify-between text-sm font-black text-slate-400">
             <span>Delivery Charge</span>
             <span className="text-emerald-600">+₹{order.deliveryCharge}</span>
           </div>
@@ -535,92 +604,55 @@ const SalesCard = ({ order, refresh, token }) => {
         </div>
       </div>
 
-     <div className="px-10 pb-10 grid grid-cols-1 md:grid-cols-3 gap-4">
-
-  {isCancelled ? (
-    <>
-      <button
-        disabled
-        className="flex items-center justify-center gap-3 py-4.5 bg-slate-200 text-slate-400 rounded-[1.8rem] font-black text-sm tracking-widest cursor-not-allowed"
-      >
-        <XCircle size={18} />
-        ORDER CANCELLED
-      </button>
-
-      <button
-        disabled
-        className="flex items-center justify-center gap-2 py-4.5 bg-slate-200 text-slate-400 rounded-[1.8rem] font-black text-sm cursor-not-allowed"
-      >
-        <MapPin size={18} />
-        Tracking Disabled
-      </button>
-
-      <button
-        disabled
-        className="flex items-center justify-center gap-2 py-4.5 bg-slate-200 text-slate-400 rounded-[1.8rem] font-black text-sm cursor-not-allowed"
-      >
-        <ExternalLink size={18} />
-        Details Locked
-      </button>
-    </>
-  ) : (
-    <>
-      {order.orderStatus === "placed" ? (
-        <div className="flex gap-2">
-          <button
-            onClick={() => updateStatus('accept')}
-            disabled={updating}
-            className="flex-[3] flex items-center justify-center gap-2 py-4.5 bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-orange-500 text-white rounded-[1.8rem] font-black text-[11px] uppercase tracking-widest shadow-lg shadow-orange-100 transition-all active:scale-95"
-          >
-            <Check size={18} />
-            {updating ? '...' : 'Accept Order'}
+      <div className="px-10 pb-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+        {isCancelled ? (
+          <button disabled className="flex items-center justify-center gap-3 py-4.5 bg-slate-200 text-slate-400 rounded-[1.8rem] font-black text-sm tracking-widest cursor-not-allowed col-span-3">
+            <XCircle size={18} /> ORDER CANCELLED
           </button>
+        ) : (
+          <>
+            {order.orderStatus === "placed" ? (
+              <div className="flex gap-2 col-span-1">
+                <button
+                  onClick={() => updateOrderStatus('accepted')}
+                  disabled={updating}
+                  className="flex-[3] flex items-center justify-center gap-2 py-4.5 bg-orange-500 text-white rounded-[1.8rem] font-black text-[11px] uppercase tracking-widest shadow-lg active:scale-95 transition-all"
+                >
+                  <Check size={18} /> {updating ? '...' : 'Accept Order'}
+                </button>
+                <button
+                  onClick={() => updateOrderStatus('cancel')}
+                  disabled={updating}
+                  className="flex-1 flex items-center justify-center bg-red-50 text-red-500 rounded-[1.8rem] border border-red-100 transition-all"
+                >
+                  <XCircle size={20} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleActionTrigger}
+                disabled={updating || !nextStep || order.orderStatus === 'delivered'}
+                className="flex items-center cursor-pointer justify-center gap-3 py-4.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-[1.8rem] font-black text-sm tracking-widest transition-all disabled:opacity-30 active:scale-95 shadow-lg shadow-emerald-100"
+              >
+                <Zap size={16} />
+                {updating ? "Processing..." : nextStep ? `Mark ${nextStep.replace(/_/g, ' ')}` : "Order Completed"}
+              </button>
+            )}
 
-          <button
-            onClick={() => updateStatus('cancel')}
-            disabled={updating}
-            className="flex-1 flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-500 rounded-[1.8rem] border border-red-100 transition-all"
-          >
-            <XCircle size={20} />
-          </button>
-        </div>
-      ) : (
-        <button
-          onClick={() => updateStatus(nextStep)}
-          disabled={updating || !nextStep || order.orderStatus === 'delivered'}
-          className="flex items-center cursor-pointer justify-center gap-3 py-4.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-[1.8rem] font-black text-sm tracking-widest transition-all disabled:opacity-30 active:scale-95 shadow-lg shadow-emerald-100"
-        >
-          <Zap size={16} />
-          {updating
-            ? "Processing..."
-            : nextStep
-            ? `Mark ${nextStep.replace(/_/g, ' ')}`
-            : "Order Completed"}
-        </button>
-      )}
+            <button
+              onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${order.shippingAddress?.address}`)}
+              className="flex items-center cursor-pointer justify-center gap-2 py-4.5 bg-white hover:bg-slate-50 text-slate-900 border-2 border-slate-100 rounded-[1.8rem] font-black text-sm tracking-widest transition-all"
+            >
+              <MapPin size={18} /> Track Live
+            </button>
 
-      <button
-        onClick={() =>
-          window.open(
-            `https://www.google.com/maps/search/?api=1&query=${order.shippingAddress?.address}`,
-            '_blank'
-          )
-        }
-        className="flex items-center cursor-pointer justify-center gap-2 py-4.5 bg-white hover:bg-slate-50 text-slate-900 border-2 border-slate-100 rounded-[1.8rem] font-black text-sm tracking-widest transition-all active:scale-95"
-      >
-        <MapPin size={18} />
-        Track Live
-      </button>
+            <button className="flex items-center cursor-pointer justify-center gap-2 py-4.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-[1.8rem] font-black text-sm tracking-widest border border-slate-200 transition-all">
+              <ExternalLink size={18} /> Details
+            </button>
+          </>
+        )}
+      </div>
 
-      <button className="flex items-center cursor-pointer justify-center gap-2 py-4.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-[1.8rem] font-black text-sm tracking-widest border border-slate-200 transition-all active:scale-95">
-        <ExternalLink size={18} />
-        Details
-      </button>
-    </>
-  )}
-</div>
-
-      {/* 4. FOOTER */}
       <div className="px-10 py-5 bg-slate-50/80 border-t border-slate-100 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <ShieldCheck size={16} className={order.paymentStatus === 'completed' ? 'text-emerald-500' : 'text-orange-400'} />

@@ -1,6 +1,7 @@
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import Delivery from "../models/DeliveryPartner.js";
+import User from "../models/User.js";
 
 
 export const createOrder = async (req, res) => {
@@ -274,38 +275,76 @@ export const packOrder = async (req, res) => {
 };
 // ASSIGN DELIVERY PARTNER
 export const assignDeliveryPartner = async (req, res) => {
-   try {
-      const { deliveryPartnerId } = req.body;
-      const order = await Order.findById(req.params.orderId);
-      const deliveryPartner = await Delivery.findById(deliveryPartnerId);
-      if (!order) {
-         return res.status(404).json({
-            success: false,
-            message: "Order not found"
-         });
+  try {
+    const { deliveryPartnerId } = req.body;
+
+    const order = await Order.findById(req.params.orderId);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    if (deliveryPartnerId === "SELF") {
+
+      const farmer = await User.findById(req.user.id);
+
+      if (!farmer) {
+        return res.status(404).json({
+          success: false,
+          message: "Farmer not found"
+        });
       }
-      if (!deliveryPartner) {
-         return res.status(404).json({
-            success: false,
-            message: "Delivery partner not found"
-         });
-      }
-      order.deliveryPartner = deliveryPartner._id;
+
+      order.deliveryPartner = null; 
       order.deliveryStatus = "assigned";
-      order.orderStatus = "shipped";
+      order.orderStatus = "packed";
+
       await order.save();
-      res.status(200).json({
-         success: true,
-         message: "Delivery partner assigned",
-         order
+
+      return res.status(200).json({
+        success: true,
+        message: "Self delivery assigned successfully",
+        order
       });
-   }
-   catch (error) {
-      res.status(500).json({
-         success: false,
-         message: error.message
+    }
+
+    const deliveryPartner = await Delivery.findById(deliveryPartnerId);
+
+    if (!deliveryPartner) {
+      return res.status(404).json({
+        success: false,
+        message: "Delivery partner not found"
       });
-   }
+    }
+
+    if (order.customer.toString() === deliveryPartner.userId.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: "Customer cannot be delivery partner"
+      });
+    }
+
+    order.deliveryPartner = deliveryPartner._id;
+    order.deliveryStatus = "assigned";
+    order.orderStatus = "shipped";
+
+    await order.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Delivery partner assigned successfully",
+      order
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 };
 // GET DELIVERY ORDERS
 export const getDeliveryOrders = async (req, res) => {
@@ -353,7 +392,7 @@ export const pickupOrder = async (req, res) => {
    try {
       const order =  await Order.findById(req.params.orderId);
       order.deliveryStatus =  "picked_up";
-      order.orderStatus =  "out_for_delivery";
+      order.orderStatus =  "shipped";
       await order.save();
       res.status(200).json({
          success: true,
@@ -504,3 +543,41 @@ export const getOrderStats = async (req, res) => {
          message: error.message
       });
    }};
+   
+ export const markOutForDelivery = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    // optional safety check
+    if (order.orderStatus !== "shipped") {
+      return res.status(400).json({
+        success: false,
+        message: "Order must be shipped first"
+      });
+    }
+
+    order.orderStatus = "out_for_delivery";
+    order.deliveryStatus = "picked_up";
+
+    await order.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Order is now out for delivery",
+      order
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};

@@ -4,15 +4,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 
-import {
-  ChevronRight,
-  ChevronLeft,
-  MapPin,
-  Navigation,
-  CreditCard,
-  Loader2,
-  CheckCircle2,
-} from "lucide-react";
+import {ChevronRight, ChevronLeft, MapPin, Navigation, CreditCard, Loader2, CheckCircle2,} from "lucide-react";
 
 const Checkout = () => {
   const location = useLocation();
@@ -120,48 +112,152 @@ const Checkout = () => {
   );
 };
 
-  const handlePlaceOrder = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      return toast.error("Please login first");
-    }
-    setLoading(true);
-    try {
-      const payload = {
-          farmer: farmer._id,
-          products: [
-          {
-            product: product._id,
-            quantity,
-            },
-         ],
-        shippingAddress,
-        paymentMethod,
-      };
+ const handlePlaceOrder = async () => {
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return toast.error("Please login first");
+  }
+
+  setLoading(true);
+
+  try {
+
+    const payload = {
+      farmer: farmer._id,
+
+      products: [
+        {
+          product: product._id,
+          quantity,
+        },
+      ],
+
+      shippingAddress,
+
+      paymentMethod,
+    };
+
+    // CASH ON DELIVERY
+
+    if (paymentMethod === "cod") {
 
       await axios.post(
         "http://localhost:5000/api/orders/create",
         payload,
         {
-          headers:{
+          headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
 
       toast.success("Order placed successfully");
+
       setTimeout(() => {
         navigate(`/detail/${product._id}`);
-     },1500);
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message ||
-          "Failed to place order"
-      );
-    } finally {
-      setLoading(false);
+      }, 1500);
+
+      return;
     }
-  };
+
+    // ONLINE PAYMENT
+
+    const { data } = await axios.post(
+      "http://localhost:5000/api/payment/order",
+      {
+        amount: grandTotal,
+      }
+    );
+
+    const options = {
+
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+
+      amount: data.order.amount,
+
+      currency: data.order.currency,
+
+      name: "Kisan Mitra",
+
+      description: "Fresh Farm Product Order",
+
+      order_id: data.order.id,
+
+      handler: async function (response) {
+
+        try {
+
+          // VERIFY PAYMENT
+
+          const verifyRes = await axios.post(
+            "http://localhost:5000/api/payment/verify",
+            response
+          );
+
+          if (verifyRes.data.success) {
+
+            // CREATE FINAL ORDER
+
+            await axios.post(
+              "http://localhost:5000/api/orders/create",
+              payload,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+            toast.success("Payment successful");
+
+            setTimeout(() => {
+              navigate(`/detail/${product._id}`);
+            }, 1500);
+
+          } else {
+
+            toast.error("Payment verification failed");
+
+          }
+
+        } catch (error) {
+
+          toast.error("Payment failed");
+
+        }
+      },
+
+      prefill: {
+        name: shippingAddress.fullName,
+        contact: shippingAddress.phone,
+      },
+
+      theme: {
+        color: "#10b981",
+      },
+    };
+
+    const razorpay = new window.Razorpay(options);
+
+    razorpay.open();
+
+  } catch (error) {
+
+    console.log(error);
+
+    toast.error(
+      error.response?.data?.message ||
+      "Something went wrong"
+    );
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
 
   if (!product) return null;
 

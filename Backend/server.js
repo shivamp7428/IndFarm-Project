@@ -10,6 +10,10 @@ import blogRoutes from "./routes/blogRoutes.js";
 import passport from 'passport';
 import './config/passport.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import orderRoutes from './routes/orderRoute.js'
+import DeliveryRoute from './routes/DeliveryRoute.js'
+import CommentRoute from './routes/CommentRoute.js'
+import RequestDeliveryRoute from './routes/RequestDeliveryRoute.js'
 
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
@@ -29,9 +33,12 @@ app.use(cors({
 app.use(morgan("dev")); 
 app.use("/api/auth", UserRouter);
 app.use("/api/products", productRoutes);
+app.use("/api/comment",CommentRoute)
+app.use("/api/delivery-request",RequestDeliveryRoute)
+app.use("/api/delivery",DeliveryRoute)
 app.use("/api/blogs", blogRoutes);
+app.use("/api/orders", orderRoutes);
 app.use('/api/payment', paymentRoutes);
-
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

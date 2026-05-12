@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Truck, Clock, MapPin, ShoppingBag, 
-  ExternalLink, ChevronRight, Store, ArrowLeft, Trash2 
+  ExternalLink, ChevronRight, Store, ArrowLeft, Trash2, 
+  CheckCircle2
 } from 'lucide-react';
 
 const MyOrders = () => {
@@ -233,12 +234,20 @@ const OrderCard = ({ order, navigate, formatTimeAgo, refreshOrders }) => {
                 </button>
               )}
 
-              <button 
-                onClick={() => navigate("/track-delivery", { state: { order } })}
-                className="flex items-center justify-center gap-2 px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm transition-all shadow-lg shadow-emerald-200"
-              >
-                <MapPin size={18} /> Track Live
-              </button>
+             {!isCancelled && (
+                   order.orderStatus === "delivered" ? (
+                   <button disabled className="flex items-center justify-center gap-2 px-8 py-4 bg-slate-200 text-slate-500 rounded-2xl font-black text-sm cursor-not-allowed" >
+                    <CheckCircle2 size={18} /> Order Completed
+                   </button>
+              ) : (
+             <button 
+             onClick={() => navigate("/track-delivery", { state: { order } })}
+             className="flex items-center justify-center gap-2 px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm transition-all shadow-lg shadow-emerald-200"
+         >
+      <MapPin size={18} /> Track Live
+    </button>
+  )
+)}
             </>
           )}
 

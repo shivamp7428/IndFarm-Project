@@ -466,60 +466,64 @@ export const getCompletedDeliveries = async(req,res)=>{
 }
 
 export const getAllDeliveryPartners = async (req, res) => {
-   try {
+  try {
+    let { latitude, longitude } = req.query;
+    console.log("FETCHING PARTNERS");
+    const userLat = latitude ? parseFloat(latitude) : null;
+    const userLon = longitude ? parseFloat(longitude) : null;
 
-      const { latitude, longitude } = req.query;
+    const partners = await Delivery.find({
+      isActive: true,
+      isAvailable: true,
+      status: "approved",
+    }).populate("userId", "fullName email img phone");
 
-      const partners = await Delivery.find({
-         isActive: true,
-         isAvailable: true,
-         status: "approved"
-      }).populate("userId", "fullName email img phone");
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+      if (lat1 === null || lon1 === null || lat2 === null || lon2 === null) {
+        return null; 
+      }
 
-      const calculateDistance = (lat1, lon1, lat2, lon2) => {
-         const toRad = (value) => (value * Math.PI) / 180;
+      const toRad = (value) => (value * Math.PI) / 180;
+      const R = 6371; 
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
 
-         const R = 6371; // km
-         const dLat = toRad(lat2 - lat1);
-         const dLon = toRad(lon2 - lon1);
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(lat1)) *
+          Math.cos(toRad(lat2)) *
+          Math.sin(dLon / 2) ** 2;
 
-         const a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(toRad(lat1)) *
-            Math.cos(toRad(lat2)) *
-            Math.sin(dLon / 2) *
-            Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    };
 
-         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const enriched = partners.map((p) => {
+      const dist = calculateDistance(
+        userLat,
+        userLon,
+        p?.location?.latitude,
+        p?.location?.longitude
+      );
 
-         return R * c;
+      return {
+        ...p._doc,
+        distance: dist !== null ? Number(dist.toFixed(2)) : Infinity,
       };
+    });
 
-      const enriched = partners.map(p => {
-         const distance = calculateDistance(
-            latitude,
-            longitude,
-            p.latitude,
-            p.longitude
-         );
+    enriched.sort((a, b) => a.distance - b.distance);
 
-         return {
-            ...p._doc,
-            distance: Number(distance.toFixed(2))
-         };
-      });
+    res.status(200).json({
+      success: true,
+      partners: enriched,
+    });
 
-      enriched.sort((a, b) => a.distance - b.distance);
-
-      res.status(200).json({
-         success: true,
-         partners: enriched
-      });
-
-   } catch (error) {
-      res.status(500).json({
-         success: false,
-         message: error.message
-      });
-   }
+  } catch (error) {
+    console.error("SERVER ERROR IN GET_PARTNERS:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
 };

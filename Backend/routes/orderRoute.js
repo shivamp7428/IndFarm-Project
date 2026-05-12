@@ -1,7 +1,7 @@
 
 import express from "express";
 import auth from "../middlewares/auth.js";
-import { acceptDelivery, acceptOrder, assignDeliveryPartner, cancelOrder, createOrder, deliverOrder, getDeliveryOrders, getFarmerOrders, getOrderStats, getSingleOrder, getUserOrders, packOrder, pickupOrder, updatePaymentStatus } from './../controllers/orderController.js';
+import { acceptDelivery, acceptOrder, assignDeliveryPartner, cancelOrder, createOrder, deliverOrder, getDeliveryOrders, getFarmerOrders, getOrderStats, getSingleOrder, getUserOrders, markOutForDelivery, packOrder, pickupOrder, updatePaymentStatus } from './../controllers/orderController.js';
 
 const router = express.Router();
 
@@ -19,5 +19,6 @@ router.put("/deliver/:orderId",auth,deliverOrder);
 router.put("/cancel/:orderId",auth,cancelOrder);
 router.put( "/payment/:orderId", auth, updatePaymentStatus);
 router.get( "/stats/all", auth, getOrderStats);
+router.put("/out-for-delivery/:orderId", auth, markOutForDelivery);
 
 export default router;
