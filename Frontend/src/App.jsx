@@ -29,6 +29,8 @@ import DeliveryForm from "./page/DeliveryForm";
 import Checkout from "./page/CheckOut";
 import MyOrders from "./page/MyOrders";
 import FarmerOrder from "./page/FarmerOrders";
+import OrderDetail from "./page/OrderDetail";
+import FarmerHub from "./page/FarmerHub";
 
 
 function App() {
@@ -47,6 +49,7 @@ function App() {
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/refund" element={<RefundPage />} />
         <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/farmershub" element={<FarmerHub />} />
         <Route path="/detail/:id" element={<Detail />} />
         <Route path="/farmerProfile/:id" element={<FarmerProfile />} />
 
@@ -111,10 +114,18 @@ function App() {
         />
 
         <Route 
-          path="/user-delivery-dashboard/:id/:id" 
+          path="/user-delivery-dashboard/:userId/:deliveryPartnerId" 
           element={
             <ProtectedRoute allowedRoles={["customer", "user"]}>
               <UserDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/order-details/:orderId" 
+          element={
+            <ProtectedRoute>
+              <OrderDetail />
             </ProtectedRoute>
           } 
         />

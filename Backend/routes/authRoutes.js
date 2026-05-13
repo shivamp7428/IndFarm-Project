@@ -1,5 +1,5 @@
 import express from 'express';
-import {  login, updateProfile, changePassword, deleteAccount, signup, getProfile, sendOTP, verifyOTP, getFarmerById } from '../controllers/authController.js';
+import {  login, updateProfile, changePassword, deleteAccount, signup, getProfile, sendOTP, verifyOTP, getFarmerById, getAllFarmers, createFarmer } from '../controllers/authController.js';
 import auth from '../middlewares/auth.js';
 import { upload } from '../config/cloudinary.js';
 import passport from 'passport';
@@ -18,10 +18,11 @@ UserRouter.get('/google/callback',  passport.authenticate('google', { failureRed
     res.redirect(`http://localhost:3000/login-success?token=${token}`);
   }
 );
-
+UserRouter.get("/farmers", getAllFarmers);
 UserRouter.get('/me',auth, getProfile);
 UserRouter.put('/update',auth,upload.fields([{ name: "farmImage", maxCount: 1 },{ name: "profileImage", maxCount: 1 }]),updateProfile);
 UserRouter.put('/change-password',auth, changePassword);
 UserRouter.delete('/delete',auth, deleteAccount);
 UserRouter.get("/:id", getFarmerById);
+UserRouter.post("/create-farmer", createFarmer);
 export default UserRouter;

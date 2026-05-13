@@ -6,18 +6,15 @@ import {
   ShoppingBag, ShieldCheck, Truck 
 } from "lucide-react";
 import { useTranslation } from "../context/LanguageContext";
+import { useNavigate } from 'react-router-dom';
 
-const DUMMY_CART = [
-  { id: 1, name: "Organic Red Tomatoes", price: 60, quantity: 2, unit: "kg", image: "https://images.unsplash.com/photo-1597362868123-a5563b014a04?auto=format&fit=crop&q=80&w=200" },
-  { id: 2, name: "Fresh Green Spinach", price: 40, quantity: 1, unit: "bundle", image: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&q=80&w=200" }
-];
 
 const CartPage = () => {
   const { translations: t } = useTranslation();
   const [cartItems, setCartItems] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Auth state
   const [loading, setLoading] = useState(true);
-
+const navigate = useNavigate();
   useEffect(() => {
     const token = localStorage.getItem("token");
     
@@ -139,9 +136,13 @@ const CartPage = () => {
                   </div>
                 </div>
 
-                <button disabled={cartItems.length === 0} className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-700 disabled:bg-slate-200 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-100 mb-4">
-                  {t.checkout || "Proceed to Checkout"}
-                </button>
+                <button 
+                  onClick={() => navigate('/marketplace')} // Yeh line add karein
+                  disabled={cartItems.length === 0} 
+                 className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-700 disabled:bg-slate-200 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-100 mb-4"
+                >
+               {t.checkout || "Proceed to Checkout"}
+              </button>
 
                 <div className="space-y-3 opacity-60">
                    <div className="flex items-center gap-3 text-[10px] font-black text-slate-500 uppercase tracking-tighter">

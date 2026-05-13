@@ -1,7 +1,7 @@
 import DeliveryRequest from "../models/RequestDelivery.js";
 import Delivery from "../models/DeliveryPartner.js";
 import Order from "../models/Order.js";
-
+import mongoose from "mongoose";
 
 export const sendDeliveryRequest = async (req, res) => {
    try {
@@ -120,31 +120,47 @@ export const getFarmerDeliveryRequests = async (req, res) => {
 };
 
 export const getDeliveryPartnerRequests = async (req, res) => {
+  try {
+    const { deliveryPartnerId } = req.params;
 
-   try {
+    if (!deliveryPartnerId) {
+      return res.status(400).json({
+        success: false,
+        message: "deliveryPartnerId is required"
+      });
+    }
 
-      const requests = await DeliveryRequest.find({
-         deliveryPartnerId: req.params.deliveryId
+    if (!mongoose.Types.ObjectId.isValid(deliveryPartnerId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid deliveryPartnerId"
+      });
+    }
+
+    const requests = await DeliveryRequest.find({
+      deliveryPartnerId
+    })
+      .populate({
+        path: "farmerId",
+        select: "fullName phone farmName img"
       })
       .populate({
-         path: "farmerId",
-         select: "fullName phone farmName img"
+        path: "orderId",
+        select: "status totalPrice items createdAt"
       })
-      .populate("orderId")
       .sort({ createdAt: -1 });
 
-      res.status(200).json({
-         success: true,
-         requests
-      });
+    return res.status(200).json({
+      success: true,
+      requests
+    });
 
-   } catch (error) {
-
-      res.status(500).json({
-         success: false,
-         message: error.message
-      });
-   }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 };
 
 export const acceptDeliveryRequest = async (req, res) => {
@@ -228,3 +244,4 @@ export const rejectDeliveryRequest = async (req, res) => {
       });
    }
 };
+

@@ -40,7 +40,7 @@ const Checkout = () => {
   const subtotal = product?.price * quantity;
 
   const deliveryCharge =
-    subtotal < 100 ? 30 : subtotal < 300 ? 15 : 0;
+    subtotal < 100 ? 30 : subtotal < 300 ? 20 : 15;
 
   const grandTotal = subtotal + deliveryCharge;
 

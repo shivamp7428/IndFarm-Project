@@ -240,14 +240,21 @@ const OrderCard = ({ order, navigate, formatTimeAgo, refreshOrders }) => {
                     <CheckCircle2 size={18} /> Order Completed
                    </button>
               ) : (
-             <button 
-             onClick={() => navigate("/track-delivery", { state: { order } })}
-             className="flex items-center justify-center gap-2 px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm transition-all shadow-lg shadow-emerald-200"
-         >
-      <MapPin size={18} /> Track Live
-    </button>
-  )
-)}
+            <button 
+                 onClick={() => {
+                 const address = order.shippingAddress?.address;
+                 if (address) {
+                  window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
+                 } else {
+                  alert("Delivery address not found for tracking.");
+                 }
+                }}
+                 className="flex items-center cursor-pointer justify-center gap-2 px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm transition-all shadow-lg shadow-emerald-200"
+                 >
+                <MapPin size={18} /> Track Live
+             </button>
+              )
+              )}
             </>
           )}
 
