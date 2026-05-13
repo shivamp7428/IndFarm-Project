@@ -216,7 +216,7 @@ const UserDeliveryDashboard = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="bg-emerald-100 text-emerald-700 text-[9px] md:text-[10px] font-black px-2 py-1 rounded-full uppercase flex items-center gap-1">
+                        <span className="bg-emerald-100 text-emerald-700 text-[9px] md:text-[10px] font-black px-2 py-1 rounded-full  flex items-center gap-1">
                            <Clock size={10} /> {formatTimeAgo(order.deliveredAt)}
                         </span>
                       </div>
