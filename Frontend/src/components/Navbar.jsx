@@ -106,6 +106,7 @@ function SearchBar() {
   );
 }
 
+
 function AccountDropdown() {
    const { translations: t } = useTranslation();
   const { user, isAuthenticated, logout } = useAuth();

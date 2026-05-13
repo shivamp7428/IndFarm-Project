@@ -87,6 +87,7 @@ function ProductSection() {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
+
       
       return matchesSearch && matchesPrice;
     }).map((product) => (
