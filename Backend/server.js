@@ -25,9 +25,19 @@ const app = express();
 app.use(passport.initialize());
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://ind-farm-project-j1qb.vercel.app"
+];
 app.use(cors({
-    origin: "http://localhost:3000",
-    credentials: true
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
 }));
 
 app.use(morgan("dev")); 
