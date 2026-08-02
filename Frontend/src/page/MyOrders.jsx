@@ -34,9 +34,9 @@ const MyOrders = () => {
   const fetchOrders = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/orders/user/${user?._id || user?.id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  `${import.meta.env.VITE_API_URL}/orders/user/${user?._id || user?.id}`,
+  { headers: { Authorization: `Bearer ${token}` } }
+);
       setOrders(res.data.orders || []);
     } catch (err) {
       console.error(err);
@@ -118,10 +118,10 @@ const OrderCard = ({ order, navigate, formatTimeAgo, refreshOrders }) => {
         await Promise.all(
           order.products.map(async (p) => {
             try {
-              const res = await axios.get(`http://localhost:5000/api/products/${p.product}`);
-              if (res.data && res.data.data) details[p.product] = res.data.data;
-              else details[p.product] = res.data;
-            } catch (e) { console.error("Error fetching product:", p.product); }
+  const res = await axios.get(`${import.meta.env.VITE_API_URL}/products/${p.product}`);
+  if (res.data && res.data.data) details[p.product] = res.data.data;
+  else details[p.product] = res.data;
+} catch (e) { console.error("Error fetching product:", p.product); }
           })
         );
         setProductDetails(details);
@@ -136,10 +136,10 @@ const OrderCard = ({ order, navigate, formatTimeAgo, refreshOrders }) => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5000/api/orders/cancel/${order._id}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  `${import.meta.env.VITE_API_URL}/orders/cancel/${order._id}`,
+  {},
+  { headers: { Authorization: `Bearer ${token}` } }
+);
       refreshOrders(); 
     } catch (err) {
       alert(err.response?.data?.message || "Error cancelling order.");

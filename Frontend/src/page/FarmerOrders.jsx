@@ -21,9 +21,9 @@ const FarmerOrder = () => {
     setLoadingSales(true);
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/orders/farmer/${user?._id || user?.id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  `${import.meta.env.VITE_API_URL}/orders/farmer/${user?._id || user?.id}`,
+  { headers: { Authorization: `Bearer ${token}` } }
+);
       setSalesOrders(res.data.orders || []);
     } catch (err) { 
       console.error(err); 
@@ -36,9 +36,9 @@ const FarmerOrder = () => {
     setLoadingPurchases(true);
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/orders/user/${user?._id || user?.id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  `${import.meta.env.VITE_API_URL}/orders/user/${user?._id || user?.id}`,
+  { headers: { Authorization: `Bearer ${token}` } }
+);
       setPurchaseOrders(res.data.orders || []);
     } catch (err) { 
       console.error(err); 
@@ -199,10 +199,10 @@ const PurchaseOrderCard = ({ order, navigate }) => {
         await Promise.all(
           order.products.map(async (p) => {
             try {
-              const res = await axios.get(`http://localhost:5000/api/products/${p.product}`);
-              if (res.data && res.data.data) details[p.product] = res.data.data;
-              else details[p.product] = res.data;
-            } catch (e) { console.error("Error fetching product:", p.product); }
+  const res = await axios.get(`${import.meta.env.VITE_API_URL}/products/${p.product}`);
+  if (res.data && res.data.data) details[p.product] = res.data.data;
+  else details[p.product] = res.data;
+} catch (e) { console.error("Error fetching product:", p.product); }
           })
         );
         setProductDetails(details);
@@ -217,10 +217,10 @@ const PurchaseOrderCard = ({ order, navigate }) => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5000/api/orders/cancel/${order._id}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  `${import.meta.env.VITE_API_URL}/orders/cancel/${order._id}`,
+  {},
+  { headers: { Authorization: `Bearer ${token}` } }
+);
       // Refresh purchases
       window.location.reload(); // Simple refresh for purchases tab
     } catch (err) {
@@ -423,10 +423,10 @@ const currentStepIndex = statusSteps.indexOf(order.orderStatus);
       try {
         await Promise.all(
           order.products.map(async (p) => {
-            try {
-              const res = await axios.get(`http://localhost:5000/api/products/${p.product}`);
-              details[p.product] = res.data.data || res.data;
-            } catch (e) { console.error("Error fetching product:", p.product); }
+           try {
+  const res = await axios.get(`${import.meta.env.VITE_API_URL}/products/${p.product}`);
+  details[p.product] = res.data.data || res.data;
+} catch (e) { console.error("Error fetching product:", p.product); }
           })
         );
         setProductDetails(details);
@@ -466,10 +466,10 @@ const currentStepIndex = statusSteps.indexOf(order.orderStatus);
       const endpoint = endpointMap[action] || action;
 
       const res = await axios.put(
-        `http://localhost:5000/api/orders/${endpoint}/${order._id}`, 
-        { otp: action === 'delivered' ? otpInput : undefined },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  `${import.meta.env.VITE_API_URL}/orders/${endpoint}/${order._id}`,
+  { otp: action === 'delivered' ? otpInput : undefined },
+  { headers: { Authorization: `Bearer ${token}` } }
+);
 
       toast.success(`Order ${action.replace(/_/g, ' ')} successfully!`);
       setShowOtpModal(false);

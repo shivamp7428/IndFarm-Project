@@ -25,9 +25,9 @@ const OrderDetail = () => {
       try {
         setLoading(true);
 
-        const orderRes = await axios.get(`http://localhost:5000/api/orders/${orderId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+       const orderRes = await axios.get(`${import.meta.env.VITE_API_URL}/orders/${orderId}`, {
+  headers: { Authorization: `Bearer ${token}` }
+});
 
         const orderData = orderRes.data.order || orderRes.data;
         setOrder(orderData);
@@ -42,9 +42,9 @@ const OrderDetail = () => {
 
         // Fetch Farmer Details
         if (farmerId) {
-          const fRes = await axios.get(`http://localhost:5000/api/auth/${farmerId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          const fRes = await axios.get(`${import.meta.env.VITE_API_URL}/auth/${farmerId}`, {
+  headers: { Authorization: `Bearer ${token}` }
+});
           setFarmer(fRes.data.farmer || fRes.data);
         }
 

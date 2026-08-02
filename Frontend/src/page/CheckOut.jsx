@@ -144,7 +144,7 @@ const Checkout = () => {
     if (paymentMethod === "cod") {
 
       await axios.post(
-        "http://localhost:5000/api/orders/create",
+        `${import.meta.env.VITE_API_URL}/orders/create`,
         payload,
         {
           headers: {
@@ -165,7 +165,7 @@ const Checkout = () => {
     // ONLINE PAYMENT
 
     const { data } = await axios.post(
-      "http://localhost:5000/api/payment/order",
+      `${import.meta.env.VITE_API_URL}/payment/order`,
       {
         amount: grandTotal,
       }
@@ -192,7 +192,7 @@ const Checkout = () => {
           // VERIFY PAYMENT
 
           const verifyRes = await axios.post(
-            "http://localhost:5000/api/payment/verify",
+            `${import.meta.env.VITE_API_URL}/payment/verify`,
             response
           );
 
@@ -201,7 +201,7 @@ const Checkout = () => {
             // CREATE FINAL ORDER
 
             await axios.post(
-              "http://localhost:5000/api/orders/create",
+              `${import.meta.env.VITE_API_URL}/orders/create`,
               payload,
               {
                 headers: {

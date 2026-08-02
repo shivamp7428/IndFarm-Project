@@ -186,16 +186,16 @@ const handleSubmit = async (e) => {
     formData.append("latitude", location.lat);
     formData.append("longitude", location.lng);
 
-    const { data } = await axios.post(
-      "http://localhost:5000/api/delivery/register",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+   const { data } = await axios.post(
+  `${import.meta.env.VITE_API_URL}/delivery/register`,
+  formData,
+  {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
     if (data.success) {
       toast.success("Registration Successful 🎉");

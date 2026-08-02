@@ -45,10 +45,10 @@ const fetchAllData = async () => {
         }
       : {};
 
-    const farmerUrl = `http://localhost:5000/api/auth/${id}`;
-    const productUrl = `http://localhost:5000/api/products/farmer/${id}`;
-    const blogUrl = `http://localhost:5000/api/blogs/farmer/${id}`;
-    const commentUrl = `http://localhost:5000/api/comment/farmer/${id}`;
+ const farmerUrl = `${import.meta.env.VITE_API_URL}/auth/${id}`;
+const productUrl = `${import.meta.env.VITE_API_URL}/products/farmer/${id}`;
+const blogUrl = `${import.meta.env.VITE_API_URL}/blogs/farmer/${id}`;
+const commentUrl = `${import.meta.env.VITE_API_URL}/comment/farmer/${id}`;
 
     const [
       farmerRes,
@@ -109,12 +109,11 @@ const fetchAllData = async () => {
   try {
     const token = localStorage.getItem("token");
     const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+const farmerUrl = `${import.meta.env.VITE_API_URL}/auth/${id}`;
+const productUrl = `${import.meta.env.VITE_API_URL}/products/farmer/${id}`;
+const blogUrl = `${import.meta.env.VITE_API_URL}/blogs/farmer/${id}`;
 
-    const farmerUrl = `http://localhost:5000/api/auth/${id}`;
-    const productUrl = `http://localhost:5000/api/products/farmer/${id}`;
-    const blogUrl = `http://localhost:5000/api/blogs/farmer/${id}`;
-    
-    const commentUrl = `http://localhost:5000/api/comment/farmer/${id}`; 
+const commentUrl = `${import.meta.env.VITE_API_URL}/comment/farmer/${id}`;
 
     const [farmerRes, productsRes, blogsRes, commentsRes] = await Promise.allSettled([
       axios.get(farmerUrl, config),
@@ -175,7 +174,7 @@ const handleDeleteComment = async (commentId) => {
 
   if (result.isConfirmed) {
     try {
-      await axios.delete(`http://localhost:5000/api/comment/delete/${commentId}`, config);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/comment/delete/${commentId}`, config);
       
       toast.success("Review deleted!");
       

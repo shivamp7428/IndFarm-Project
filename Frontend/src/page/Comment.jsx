@@ -36,7 +36,10 @@ const FarmerReviewSection = () => {
       try {
         const token = localStorage.getItem("token");
         const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-        const response = await axios.get(`http://localhost:5000/api/comment/farmer/${id}`, config);
+        const response = await axios.get(
+  `${import.meta.env.VITE_API_URL}/comment/farmer/${id}`,
+  config
+);
         
         setReviewListData(response.data.comments || []);
         

@@ -34,9 +34,9 @@ const UserDeliveryDashboard = () => {
   const fetchOrders = useCallback(async () => {
     if (!deliveryPartnerId) return;
     try {
-      const res = await axios.get(`http://localhost:5000/api/orders/delivery/${deliveryPartnerId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/orders/delivery/${deliveryPartnerId}`, {
+  headers: { Authorization: `Bearer ${token}` }
+});
       setOrders(res.data.orders || []);
     } catch (err) { console.log(err); }
   }, [deliveryPartnerId, token]);
@@ -44,21 +44,21 @@ const UserDeliveryDashboard = () => {
   const fetchRequests = useCallback(async () => {
     if (!deliveryPartnerId) return;
     try {
-      const res = await axios.get(`http://localhost:5000/api/delivery-request/partner/${deliveryPartnerId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/delivery-request/partner/${deliveryPartnerId}`, {
+  headers: { Authorization: `Bearer ${token}` }
+});
       setRequests(res.data.requests || []);
     } catch (err) { console.log(err); }
   }, [deliveryPartnerId, token]);
 
   const acceptRequest = async (id) => {
-    await axios.put(`http://localhost:5000/api/delivery-request/accept/${id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
-    fetchRequests(); fetchOrders();
+    await axios.put(`${import.meta.env.VITE_API_URL}/delivery-request/accept/${id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+fetchRequests(); fetchOrders();
   };
 
   const rejectRequest = async (id) => {
-    await axios.put(`http://localhost:5000/api/delivery-request/reject/${id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
-    fetchRequests();
+  await axios.put(`${import.meta.env.VITE_API_URL}/delivery-request/reject/${id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+fetchRequests();
   };
 
   useEffect(() => {

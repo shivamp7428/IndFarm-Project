@@ -78,10 +78,10 @@ const userRole = user.role;
       const userId = localUser.id || localUser._id;
 
       const [profileRes, productsRes, blogsRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/auth/me", getAuthHeader()),
-        axios.get(`http://localhost:5000/api/products/my-products/${userId}`, getAuthHeader()),
-        axios.get(`http://localhost:5000/api/blogs/farmer/${userId}`, getAuthHeader())
-      ]);
+  axios.get(`${import.meta.env.VITE_API_URL}/auth/me`, getAuthHeader()),
+  axios.get(`${import.meta.env.VITE_API_URL}/products/my-products/${userId}`, getAuthHeader()),
+  axios.get(`${import.meta.env.VITE_API_URL}/blogs/farmer/${userId}`, getAuthHeader())
+]);
 
       const backendUser = profileRes.data?.user || profileRes.data?.data || profileRes.data || {};
 
@@ -147,11 +147,15 @@ const userRole = user.role;
       if (editForm.farmImage) formData.append("farmImage", editForm.farmImage);
       if (editForm.profileImage) formData.append("profileImage", editForm.profileImage);  // Important: using "img"
 
-      await axios.put("http://localhost:5000/api/auth/update", formData, {
-        headers: {
-           Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
-      });
+      await axios.put(
+  `${import.meta.env.VITE_API_URL}/auth/update`,
+  formData,
+  {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    }
+  }
+);
      // Update localStorage name
        const user = JSON.parse(localStorage.getItem("user"));
        user.fullName = editForm.fullName;
@@ -192,11 +196,11 @@ const userRole = user.role;
         formData.append("productImage", productForm.productImage);
       }
 
-      await axios.post("http://localhost:5000/api/products/add", formData, {
-         headers: {
-           Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
-      });
+      await axios.post(`${import.meta.env.VITE_API_URL}/products/add`, formData, {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("token")}`
+  }
+});
 
       toast.success("Product Added Successfully!");
       setShowAddProduct(false);
@@ -229,11 +233,11 @@ const userRole = user.role;
          formData.append("blogImage", blogForm.blogImage);
       }
 
-      await axios.post("http://localhost:5000/api/blogs/add", formData, {
-         headers: {
-           Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
-      });
+      await axios.post(`${import.meta.env.VITE_API_URL}/blogs/add`, formData, {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("token")}`
+  }
+});
 
       toast.success("Blog Posted Successfully!");
       setShowAddBlog(false);
@@ -321,15 +325,15 @@ const handleUpdateProduct = async (e) => {
     }
 
     await axios.put(
-      `http://localhost:5000/api/products/${editingProduct._id}`,
-      formData,
-      {
-        headers: {
-          ...getAuthHeader().headers,
-          "Content-Type": "multipart/form-data"
-        }
-      }
-    );
+  `${import.meta.env.VITE_API_URL}/products/${editingProduct._id}`,
+  formData,
+  {
+    headers: {
+      ...getAuthHeader().headers,
+      "Content-Type": "multipart/form-data"
+    }
+  }
+);
 
     toast.success("Product Updated Successfully!");
     setIsEditingProduct(false);
@@ -354,9 +358,9 @@ const handleUpdateProduct = async (e) => {
      cancelButtonText: "Cancel"  });  
      if (!result.isConfirmed) return;  
      try {    
-      await axios.delete(`http://localhost:5000/api/products/${id}`,getAuthHeader());
-       toast.success("Product Deleted Successfully!");   
-       fetchFarmerData();  
+      await axios.delete(`${import.meta.env.VITE_API_URL}/products/${id}`, getAuthHeader());
+toast.success("Product Deleted Successfully!");
+fetchFarmerData();
       } catch (err) {    
         console.error(err);   
        toast.error("Delete Failed");  
@@ -385,9 +389,9 @@ const handleDeleteBlog = async (id) => {
 
   try {
     await axios.delete(
-      `http://localhost:5000/api/blogs/${id}`,
-      getAuthHeader()
-    );
+  `${import.meta.env.VITE_API_URL}/blogs/${id}`,
+  getAuthHeader()
+);
     toast.success("Blog Deleted Successfully!");
     fetchFarmerData();
   } catch (err) {

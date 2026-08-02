@@ -40,8 +40,8 @@ export default function Detail() {
 
   const fetchProduct = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/products/${id}`);
-      setProduct(res.data.data);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/products/${id}`);
+setProduct(res.data.data);
     } catch (err) {
       console.error("Error fetching product:", err);
     }
@@ -49,8 +49,8 @@ export default function Detail() {
 
   const fetchComments = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/comment/product/${id}`);
-      setComments(res.data.comments || []);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/comment/product/${id}`);
+setComments(res.data.comments || []);
     } catch (err) {
       console.error("Error fetching comments:", err);
     }
@@ -64,8 +64,8 @@ export default function Detail() {
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/products");
-        setAllProducts(res.data.data || []);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
+setAllProducts(res.data.data || []);
       } catch (err) {
         console.error("Error fetching all products:", err);
       }
@@ -92,11 +92,11 @@ export default function Detail() {
 
     setCommentLoading(true);
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/comment/create",
-        payload,
-        { headers: { Authorization: `Bearer ${userToken}` } }
-      );
+     const res = await axios.post(
+  `${import.meta.env.VITE_API_URL}/comment/create`,
+  payload,
+  { headers: { Authorization: `Bearer ${userToken}` } }
+);
 
       if (res.data.success) {
         toast.success("Review posted successfully!");
@@ -150,9 +150,13 @@ export default function Detail() {
     if (result.isConfirmed) {
       setCommentLoading(true);
       try {
-        await axios.delete(`http://localhost:5000/api/comment/delete/${commentId}`, config);
-        toast.success("Review deleted!");
-        fetchComments();
+        await axios.delete(
+  `${import.meta.env.VITE_API_URL}/comment/delete/${commentId}`,
+  config
+);
+
+toast.success("Review deleted!");
+fetchComments();
       } catch (err) {
         toast.error("Failed to delete review");
       } finally {

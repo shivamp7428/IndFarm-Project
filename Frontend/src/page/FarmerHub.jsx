@@ -30,7 +30,7 @@ const FarmerHub = () => {
   useEffect(() => {
     const fetchFarmers = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/auth/farmers');
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/farmers`);
         const data = await response.json();
         
         if (data.success && data.farmers) {

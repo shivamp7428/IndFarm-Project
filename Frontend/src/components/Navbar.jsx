@@ -135,7 +135,7 @@ function AccountDropdown() {
         if (!token) return;
         const decoded = jwtDecode(token);
         const id = decoded.id || decoded._id;
-        const farmerUrl = `http://localhost:5000/api/auth/${id}`;
+        const farmerUrl = `${import.meta.env.VITE_API_URL}/auth/${id}`;
 
         const res = await axios.get(farmerUrl, {
           headers: {
@@ -170,11 +170,11 @@ useEffect(()=>{
       try{
          if(!isAuthenticated ||user?.role === "farmer") return;
          const { data } = await axios.get(
-            `http://localhost:5000/api/delivery/status/${userId}`,
-            {
-               withCredentials:true
-            }
-         );
+  `${import.meta.env.VITE_API_URL}/delivery/status/${userId}`,
+  {
+    withCredentials:true
+  }
+);
 
          if(data.success){
             setDeliveryPartner(
@@ -385,7 +385,7 @@ function MobileMenu({ isOpen, setIsOpen }) {
         if (!token) return;
         const decoded = jwtDecode(token);
         const id = decoded.id || decoded._id;
-        const farmerUrl = `http://localhost:5000/api/auth/${id}`;
+        const farmerUrl = `${import.meta.env.VITE_API_URL}/auth/${id}`;
 
         const res = await axios.get(farmerUrl, {
           headers: {

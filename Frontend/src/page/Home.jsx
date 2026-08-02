@@ -19,7 +19,7 @@ export default function Home() {
     useEffect(() => {
         const fetchHomeProducts = async () => {
             try {
-                const res = await axios.get("http://localhost:5000/api/products");
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
                 const data = res.data.data || [];
                 setRealProducts(data.slice(0, 15));
             } catch (error) {
@@ -31,7 +31,7 @@ export default function Home() {
 
         const fetchFarmers = async () => {
             try {
-                const res = await axios.get("http://localhost:5000/api/auth/farmers");
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/auth/farmers`);
                 if (res.data.success) {
                     setFarmers(res.data.farmers.slice(0, 10));
                 }

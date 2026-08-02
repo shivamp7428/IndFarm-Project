@@ -30,10 +30,13 @@ const KisanMitraAssignDelivery = ({ isOpen, onClose, orderId }) => {
   const fetchPartners = async (lat, lng) => {
     try {
       setFetchingPartners(true);
-      const res = await axios.get("http://localhost:5000/api/delivery/all", {
-        params: { latitude: lat, longitude: lng }, 
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(
+  `${import.meta.env.VITE_API_URL}/api/delivery/all`,
+  {
+    params: { latitude: lat, longitude: lng },
+    headers: { Authorization: `Bearer ${token}` },
+  }
+);
       if (res.data.success) {
         setPartners(res.data.partners || []);
       }
@@ -65,7 +68,11 @@ const KisanMitraAssignDelivery = ({ isOpen, onClose, orderId }) => {
       const formData = new FormData();
       formData.append("phone", newPhone);
 
-      const res = await axios.put("http://localhost:5000/api/auth/update", formData, config);
+      const res = await axios.put(
+  `${import.meta.env.VITE_API_URL}/api/auth/update`,
+  formData,
+  config
+);
       
       if (res.data) {
         const updatedUser = { ...user, phone: newPhone };
@@ -87,7 +94,7 @@ const KisanMitraAssignDelivery = ({ isOpen, onClose, orderId }) => {
     try {
       setLoading(true);
       const config = { headers: { Authorization: `Bearer ${token}` } };
-       if (isSelfSelected) {await axios.put(  `http://localhost:5000/api/orders/assign-delivery/${orderId}`,
+       if (isSelfSelected) {await axios.put(`${import.meta.env.VITE_API_URL}/api/orders/assign-delivery/${orderId}`,
          {
            deliveryPartnerId: "SELF"
           },
@@ -98,7 +105,7 @@ const KisanMitraAssignDelivery = ({ isOpen, onClose, orderId }) => {
        }else {
         if (!selectedPartner) return toast.error("Select a partner first");
         
-        await axios.post("http://localhost:5000/api/delivery-request/create", {
+        await axios.post( `${import.meta.env.VITE_API_URL}/api/delivery-request/create`,{
           orderId,
           farmerId: user?._id || user?.id,
           deliveryPartnerId: selectedPartner._id,
