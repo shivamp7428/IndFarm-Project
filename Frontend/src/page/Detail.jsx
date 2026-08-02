@@ -65,7 +65,7 @@ setComments(res.data.comments || []);
     const fetchAll = async () => {
       try {
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
-setAllProducts(res.data.data || []);
+setAllProducts(res.data || []);
       } catch (err) {
         console.error("Error fetching all products:", err);
       }
@@ -448,21 +448,32 @@ fetchComments();
 </div>
 
       {/* Recommended Section */}
-      <div className="mt-20">
-        <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-8">Recommended Products</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-          {allProducts.filter((p) => p._id !== product._id).slice(0, 10).map((item) => (
-            <Link key={item._id} to={`/detail/${item._id}`} className="bg-white flex flex-col h-[320px] p-4 hover:shadow-sm transition-shadow duration-200 group border border-transparent hover:border-gray-100">
-              <div className="h-[40px] mb-3 overflow-hidden">
-                <h3 className="text-sm font-bold text-gray-900 line-clamp-2 leading-tight  transition-colors">{item.name}</h3>
-              </div>
-              <div className="relative w-full h-[250px] bg-white flex items-center justify-center overflow-hidden ">
-                <img src={item.productImageUrl} alt={item.name} className="w-full h-full object-cover duration-300" />
-              </div>
-            </Link>
-          ))}
+      {Array.isArray(allProducts) &&
+  allProducts
+    .filter((p) => p._id !== product._id)
+    .slice(0, 10)
+    .map((item) => (
+      <Link 
+        key={item._id} 
+        to={`/detail/${item._id}`} 
+        className="bg-white flex flex-col h-[320px] p-4 hover:shadow-sm transition-shadow duration-200 group border border-transparent hover:border-gray-100"
+      >
+        <div className="h-[40px] mb-3 overflow-hidden">
+          <h3 className="text-sm font-bold text-gray-900 line-clamp-2 leading-tight">
+            {item.name}
+          </h3>
         </div>
-      </div>
+
+        <div className="relative w-full h-[250px] bg-white flex items-center justify-center overflow-hidden">
+          <img 
+            src={item.productImageUrl} 
+            alt={item.name} 
+            className="w-full h-full object-cover duration-300" 
+          />
+        </div>
+      </Link>
+    ))
+}
     </section>
   );
 }

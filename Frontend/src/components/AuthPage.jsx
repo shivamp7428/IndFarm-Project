@@ -17,7 +17,7 @@ const AuthPage = () => {
   const { translations: t } = useTranslation();
   const navigate = useNavigate();
   
- const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/auth`;
+ const API_BASE_URL = `${import.meta.env.VITE_API_URL}/auth`;
 
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState('farmer'); 
