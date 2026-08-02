@@ -275,9 +275,11 @@ const handleDeleteComment = async (commentId) => {
               </p>
             </div>
 
-            <button className="mt-8 bg-black hover:bg-gray-900 text-white px-8 py-3.5 rounded-2xl font-semibold text-lg shadow-md w-full md:w-auto transition-all active:scale-95">
+           <a href="/contact">
+             <button className="mt-8 bg-black hover:bg-gray-900 text-white px-8 py-3.5 rounded-2xl font-semibold text-lg shadow-md w-full md:w-auto transition-all active:scale-95">
               {t.contactFarmer || "Contact Farmer"}
             </button>
+           </a>
           </div>
 
           <div className="md:col-span-5 bg-gray-50 border border-gray-100 p-8 rounded-[2.5rem] shadow-sm">

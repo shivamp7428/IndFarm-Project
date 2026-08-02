@@ -169,7 +169,6 @@ function ProductSection() {
       </div>
 
       <div className="flex gap-6">
-        {/* ==================== DESKTOP FILTER SIDEBAR ==================== */}
         <div className="hidden md:block w-72 bg-white p-5 rounded-xl shadow-sm h-fit sticky top-6 self-start">
           <h2 className="font-bold text-xl mb-6 text-gray-800 border-b pb-3">Filters</h2>
 
@@ -249,9 +248,7 @@ function ProductSection() {
           </button>
         </div>
 
-        {/* ==================== PRODUCTS GRID ==================== */}
         <div className="flex-1">
-          {/* Desktop Results Count */}
           <div className="hidden md:flex mb-6 justify-between items-center">
             <p className="text-gray-600 font-medium">
               {filteredProducts.length} Products Found
@@ -295,10 +292,8 @@ function ProductSection() {
         </div>
       </div>
 
-      {/* ==================== MOBILE FILTER DRAWER ==================== */}
       {showMobileFilters && (
         <>
-          {/* Backdrop */}
           <div 
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
             onClick={() => setShowMobileFilters(false)}

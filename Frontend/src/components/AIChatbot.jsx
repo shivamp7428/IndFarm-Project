@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X,  Send,  Bot,  User,  Sparkles,  Minus,  RefreshCw,  Maximize2, Search, TrendingDown, TrendingUp, MapPin} from 'lucide-react';
+import { MessageCircle, X, Send, Bot, User, Sparkles, Minus, RefreshCw, Maximize2, Search, TrendingUp, MapPin, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import { cn } from '../utils';
@@ -21,8 +21,12 @@ export const AIChatbot = () => {
   const [size, setSize] = useState({ width: 400, height: 550 });
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [btnPosition, setBtnPosition] = useState({ x: 0, y: 0 });
+  const [isListening, setIsListening] = useState(false);
+  const [speakingId, setSpeakingId] = useState(null);
+
   const scrollRef = useRef(null);
   const dragControls = useDragControls();
+  const recognitionRef = useRef(null);
 
   // Load saved state
   useEffect(() => {
@@ -34,7 +38,6 @@ export const AIChatbot = () => {
     if (savedSize) setSize(JSON.parse(savedSize));
   }, []);
 
-  // Save state on change
   useEffect(() => {
     if (isOpen) {
       localStorage.setItem('chatbot-size', JSON.stringify(size));
@@ -47,7 +50,63 @@ export const AIChatbot = () => {
     }
   }, [messages, isMinimized]);
 
-  // ORIGINAL API LOGIC (Unchanged)
+  // ==================== VOICE INPUT (Only Fill Input - No Auto Send) ====================
+  useEffect(() => {
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognitionAPI();
+      
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'hi-IN';        // Good for Hinglish
+
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);           // Only put in input box
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, []);
+
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+    };
+  }, []);
+
+  // ==================== TEXT TO SPEECH (Unchanged) ====================
+  const speakMessage = (text, id) => {
+    if (!('speechSynthesis' in window)) return;
+
+    if (speakingId === id) {
+      window.speechSynthesis.cancel();
+      setSpeakingId(null);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'hi-IN';
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+
+    utterance.onend = () => setSpeakingId(null);
+
+    window.speechSynthesis.speak(utterance);
+    setSpeakingId(id);
+  };
+
+  // ==================== HANDLE SEND (Original Logic) ====================
   const handleSend = async (text = input) => {
     const messageText = text || input;
     if (!messageText.trim() || isLoading) return;
@@ -107,6 +166,23 @@ export const AIChatbot = () => {
 
   const resetChat = () => {
     setMessages([{ id: '1', role: 'model', text: 'Chat reset. How can I help you fresh? 🌿' }]);
+    setSpeakingId(null);
+  };
+
+  const toggleVoiceInput = () => {
+    if (!recognitionRef.current) {
+      alert("Voice input is not supported in your browser.");
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      setInput(''); // Clear previous input
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
   };
 
   return (
@@ -172,7 +248,7 @@ export const AIChatbot = () => {
               "bottom-20 right-4 md:bottom-8 md:right-8"
             )}
           >
-            {/* Header - Styled with Forest Green Gradient */}
+            {/* Header - Unchanged */}
             <div 
               onPointerDown={(e) => dragControls.start(e)}
               className="bg-gradient-to-r from-emerald-700 to-emerald-600 p-5 text-white flex items-center justify-between cursor-grab active:cursor-grabbing shrink-0 relative"
@@ -203,9 +279,9 @@ export const AIChatbot = () => {
               </div>
             </div>
 
-            {/* Content Area */}
             {!isMinimized && (
               <>
+                {/* Messages Area */}
                 <div 
                   ref={scrollRef}
                   className="flex-1 overflow-y-auto p-6 space-y-5 bg-gradient-to-b from-emerald-50/50 to-white"
@@ -232,16 +308,34 @@ export const AIChatbot = () => {
                           {msg.role === 'user' ? 'You' : 'KisanMitra'}
                         </span>
                       </div>
-                      <div className={cn(
-                        "px-4 py-3 rounded-2xl text-[13px] leading-relaxed shadow-sm",
-                        msg.role === 'user' 
-                          ? "bg-emerald-600 text-white rounded-tr-none font-medium" 
-                          : "bg-white text-slate-700 border border-emerald-100 rounded-tl-none font-medium"
-                      )}>
-                        {msg.text}
+
+                      <div className="flex items-start gap-3 w-full">
+                        <div className={cn(
+                          "px-4 py-3 rounded-2xl text-[13px] leading-relaxed shadow-sm flex-1",
+                          msg.role === 'user' 
+                            ? "bg-emerald-600 text-white rounded-tr-none font-medium" 
+                            : "bg-white text-slate-700 border border-emerald-100 rounded-tl-none font-medium"
+                        )}>
+                          {msg.text}
+                        </div>
+
+                        {msg.role === 'model' && (
+                          <button
+                            onClick={() => speakMessage(msg.text, msg.id)}
+                            className="mt-1.5 p-2 rounded-xl hover:bg-emerald-100 text-emerald-600 hover:text-emerald-700 transition-all"
+                            title="Listen"
+                          >
+                            {speakingId === msg.id ? (
+                              <VolumeX size={18} className="animate-pulse" />
+                            ) : (
+                              <Volume2 size={18} />
+                            )}
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
+
                   {isLoading && (
                     <div className="flex items-center gap-2 text-emerald-600">
                       <Sparkles size={14} className="animate-spin" />
@@ -250,7 +344,7 @@ export const AIChatbot = () => {
                   )}
                 </div>
 
-                {/* Quick Actions - Green Pill Style */}
+                {/* Quick Actions */}
                 <div className="px-6 pb-2 mt-auto flex gap-2 overflow-x-auto no-scrollbar whitespace-nowrap">
                   {QUICK_ACTIONS.map((action, i) => (
                     <button
@@ -266,14 +360,26 @@ export const AIChatbot = () => {
                 {/* Input Area */}
                 <div className="p-4 bg-white border-t border-emerald-50">
                   <div className="bg-emerald-50/50 rounded-2xl p-1.5 flex items-center gap-2 border border-emerald-100 focus-within:border-emerald-300 focus-within:bg-white transition-all">
+                    <button
+                      onClick={toggleVoiceInput}
+                      className={cn(
+                        "p-3 rounded-xl transition-all",
+                        isListening ? "bg-red-100 text-red-600 animate-pulse" : "hover:bg-emerald-100 text-emerald-600"
+                      )}
+                      title={isListening ? "Listening..." : "Voice Input"}
+                    >
+                      {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+                    </button>
+
                     <input 
                       type="text"
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                      placeholder="Ask about crops or prices..."
+                      placeholder="Ask about crops or prices... (Tap mic to speak)"
                       className="flex-1 bg-transparent border-none outline-none px-4 py-2.5 text-sm font-medium text-emerald-900 placeholder:text-emerald-300"
                     />
+
                     <button 
                       onClick={() => handleSend()}
                       disabled={!input.trim() || isLoading}
