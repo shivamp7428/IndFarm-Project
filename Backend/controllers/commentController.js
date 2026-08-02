@@ -1,6 +1,6 @@
-import CommentModel from "../Models/Comments.js";
-import ProductModel from "../Models/Product.js";
-import UserModel from "../Models/User.js";
+import CommentModel from "../models/Comments.js";
+import ProductModel from "../models/Product.js";
+import UserModel from "../models/User.js";
 
 
 // CREATE COMMENT
