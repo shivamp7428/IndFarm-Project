@@ -27,7 +27,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://ind-farm-project-j1qb.vercel.app"
+  "https://ind-farm-project-j1qb.vercel.app",
+  "https://skjiigroup.com",
+  "https://www.skjiigroup.com"
 ];
 app.use(cors({
   origin: function(origin, callback) {
